@@ -24,21 +24,28 @@ schemock start
 2. Extract to any folder
 3. Run `schemock.exe`
 
-### Basic Usage
+### Usage
 
-Start a mock server with default schema:
+**Quick Start Options:**
 ```bash
-schemock start
+schemock start schema.json              # Start with custom schema
+schemock start                          # Start with default schema
+schemock init my-api                  # Initialize new project
 ```
 
-Start with custom schema:
+**Advanced Examples:**
 ```bash
-schemock start schema.json
+schemock start user.json --port 8080 --log-level debug
+schemock start api.json --no-cors
+schemock init ecommerce-api --name "E-commerce API" --port 4000
 ```
 
-Initialize a new project:
+**Command Reference:**
 ```bash
-schemock init my-mock-api
+schemock start --help              # Show start command options
+schemock init --help               # Show init command options
+schemock --version                   # Show version
+schemock --help                      # Show general help
 ```
 
 ## ✨ Features

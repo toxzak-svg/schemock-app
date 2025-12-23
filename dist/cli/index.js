@@ -179,7 +179,24 @@ app.listen(port, () => {
 });
 // Show help if no arguments
 if (!process.argv.slice(2).length) {
-    program.outputHelp();
+    console.log(`
+${chalk_1.default.blue('Schemock - Mock Server Generator')}
+${chalk_1.default.gray('A lightweight mock server generator from JSON schemas')}
+
+${chalk_1.default.yellow('Quick Start:')}
+  ${chalk_1.default.cyan('schemock start schema.json')}     Start with custom schema
+  ${chalk_1.default.cyan('schemock start')}                 Start with default schema
+  ${chalk_1.default.cyan('schemock init my-api')}         Initialize new project
+
+${chalk_1.default.yellow('Examples:')}
+  ${chalk_1.default.cyan('schemock start user.json --port 8080')}
+  ${chalk_1.default.cyan('schemock start api.json --log-level debug')}
+  ${chalk_1.default.cyan('schemock init ecommerce-api --name "E-commerce API"')}
+
+${chalk_1.default.yellow('For detailed help:')}
+  ${chalk_1.default.cyan('schemock start --help')}
+  ${chalk_1.default.cyan('schemock init --help')}
+`);
     process.exit(0);
 }
 program.parse(process.argv);

@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "timestamp": "2025-12-23T17:35:14.516Z",
+  "timestamp": "2025-12-23T17:53:48.705Z",
   "environment": {
     "platform": "win32",
     "nodeVersion": "v24.12.0",
@@ -17,7 +17,7 @@
           "size": 76549077,
           "sizeMB": "73.00"
         },
-        "timestamp": "2025-12-23T17:35:14.518Z"
+        "timestamp": "2025-12-23T17:53:48.706Z"
       },
       "versionCheck": {
         "name": "versionCheck",
@@ -27,7 +27,7 @@
           "expected": "1.0.0",
           "actual": "1.0.0"
         },
-        "timestamp": "2025-12-23T17:35:14.728Z"
+        "timestamp": "2025-12-23T17:53:49.052Z"
       }
     },
     "functionality": {
@@ -43,7 +43,7 @@
           ],
           "output": "Usage: schemock [options] [command]\n\nA lightweight mock server generator from JSON schemas\n\nOptions:\n  -V, --version                 output the version number\n  -h, --help                    display help for command\n\nCommands:\n  start [options] [schemaPath]  Start a mock server with the provided schema\n  init [options] [directory]    Initialize a new mock server project\n  help [command]                display help for command\n"
         },
-        "timestamp": "2025-12-23T17:35:14.920Z"
+        "timestamp": "2025-12-23T17:53:49.400Z"
       },
       "helpExamples": {
         "name": "helpExamples",
@@ -52,7 +52,7 @@
         "details": {
           "hasSchemaExample": true
         },
-        "timestamp": "2025-12-23T17:35:14.920Z"
+        "timestamp": "2025-12-23T17:53:49.400Z"
       },
       "apiResponse": {
         "name": "apiResponse",
@@ -62,7 +62,7 @@
           "success": false,
           "error": ""
         },
-        "timestamp": "2025-12-23T17:35:17.985Z"
+        "timestamp": "2025-12-23T17:53:52.496Z"
       },
       "projectInit": {
         "name": "projectInit",
@@ -73,7 +73,7 @@
           "serverJs": true,
           "schemaJson": true
         },
-        "timestamp": "2025-12-23T17:35:18.328Z"
+        "timestamp": "2025-12-23T17:53:53.045Z"
       },
       "packageConfig": {
         "name": "packageConfig",
@@ -98,7 +98,7 @@
             "nodemon": "^3.0.1"
           }
         },
-        "timestamp": "2025-12-23T17:35:18.328Z"
+        "timestamp": "2025-12-23T17:53:53.045Z"
       }
     },
     "integration": {
@@ -111,29 +111,29 @@
           "total": 5,
           "percentage": 100
         },
-        "timestamp": "2025-12-23T17:35:20.900Z"
+        "timestamp": "2025-12-23T17:53:55.947Z"
       },
       "readmeQuality": {
         "name": "readmeQuality",
-        "passed": false,
+        "passed": true,
         "message": "README has essential sections",
         "details": {
           "hasQuickStart": true,
-          "hasUsage": false
+          "hasUsage": true
         },
-        "timestamp": "2025-12-23T17:35:20.900Z"
+        "timestamp": "2025-12-23T17:53:55.948Z"
       }
     },
     "performance": {
       "startupTime": {
         "name": "startupTime",
         "passed": true,
-        "message": "Server startup time: 2040ms",
+        "message": "Server startup time: 2043ms",
         "details": {
-          "startupTime": 2040,
+          "startupTime": 2043,
           "threshold": 5000
         },
-        "timestamp": "2025-12-23T17:35:20.370Z"
+        "timestamp": "2025-12-23T17:53:55.091Z"
       },
       "concurrentRequests": {
         "name": "concurrentRequests",
@@ -143,9 +143,9 @@
           "successCount": 0,
           "requestCount": 10,
           "successRate": 0,
-          "concurrentTime": 7
+          "concurrentTime": 13
         },
-        "timestamp": "2025-12-23T17:35:20.381Z"
+        "timestamp": "2025-12-23T17:53:55.111Z"
       }
     },
     "compatibility": {
@@ -157,7 +157,7 @@
           "sizeMB": 73.0028886795044,
           "recommendedMax": 100
         },
-        "timestamp": "2025-12-23T17:35:20.510Z"
+        "timestamp": "2025-12-23T17:53:55.323Z"
       },
       "windowsCompatibility": {
         "name": "windowsCompatibility",
@@ -167,24 +167,24 @@
           "versionCheck": true,
           "helpCheck": true
         },
-        "timestamp": "2025-12-23T17:35:20.898Z"
+        "timestamp": "2025-12-23T17:53:55.945Z"
       },
       "selfContained": {
         "name": "selfContained",
         "passed": true,
         "message": "Executable is self-contained (no external dependencies required)",
         "details": {},
-        "timestamp": "2025-12-23T17:35:20.898Z"
+        "timestamp": "2025-12-23T17:53:55.945Z"
       }
     }
   },
   "summary": {
-    "passed": 10,
-    "failed": 4,
+    "passed": 11,
+    "failed": 3,
     "warnings": 0,
     "totalTests": 14,
-    "passRate": "71.43",
-    "grade": "C+"
+    "passRate": "78.57",
+    "grade": "B-"
   },
   "recommendations": [
     {
@@ -200,13 +200,6 @@
       "test": "apiResponse",
       "issue": "API error: ",
       "suggestion": "Fix apiResponse in functionality"
-    },
-    {
-      "priority": "high",
-      "category": "integration",
-      "test": "readmeQuality",
-      "issue": "README has essential sections",
-      "suggestion": "Fix readmeQuality in integration"
     },
     {
       "priority": "high",
