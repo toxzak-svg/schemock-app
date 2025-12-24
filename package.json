@@ -1,7 +1,7 @@
 {
   "name": "schemock",
   "version": "1.0.0",
-  "description": "A lightweight mock server generator from JSON schemas",
+  "description": "Turn JSON schemas into live mock REST APIs in seconds for frontend/dev/test teams",
   "main": "dist/index.js",
   "bin": {
     "schemock": "dist/cli/index.js"

@@ -1,6 +1,6 @@
 # Schemock
 
-> **Transform JSON schemas into live RESTful APIs in seconds. Zero configuration. No Node.js required.**
+> **Turn JSON schemas into live mock REST APIs in seconds for frontend/dev/test teams.**
 
 [![GitHub release](https://img.shields.io/github/v/release/toxzak-svg/schemock-app)](https://github.com/toxzak-svg/schemock-app/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -374,9 +374,41 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ---
 
+## � Pricing & Licensing
+
+### Simple, One-Time Pricing
+
+| License Type | Price | Users | Best For |
+|--------------|-------|-------|----------|
+| **Individual** | One-time per user | 1 developer | Freelancers, solo developers |
+| **Team** | One-time per team | 5-25 developers | Small to medium teams |
+| **Enterprise** | Custom pricing | Unlimited | Large organizations (25+ devs) |
+
+**All licenses include:**
+- ✅ Lifetime updates for your major version
+- ✅ Pre-built binaries and installers
+- ✅ No recurring fees
+- ✅ Commercial use allowed
+
+### Open Source Option
+- **FREE** - Source code available under [MIT License](LICENSE)
+- Full access to all features
+- Build from source yourself
+- Community support
+
+**Commercial licenses** add: Professional binaries, installers, priority support, and remove attribution requirements.
+
+📋 **[View Full License Terms](COMMERCIAL-LICENSE.md)** - Complete EULA and usage rights
+
+---
+
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+Dual licensed:
+- **MIT License** - Free open source ([LICENSE](LICENSE))
+- **Commercial License** - Professional distribution ([COMMERCIAL-LICENSE.md](COMMERCIAL-LICENSE.md))
+
+Choose the license that best fits your needs.
 
 ---
 
