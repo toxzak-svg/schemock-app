@@ -4,23 +4,47 @@
 
 ### Phase 1: Build & Test (30 minutes)
 
-- [ ] Build the executable
+- [ ] Build all distribution packages
   ```powershell
-  npm run build
-  npm run build:exe
+  npm run build:distribution
+  ```
+
+- [ ] Verify build completed successfully
+  ```powershell
+  # Check distribution directory exists
+  dir releases\distribution-1.0.0
+  
+  # Verify checksums
+  npm run verify:checksums
   ```
 
 - [ ] Test the executable works
   ```powershell
-  cd dist\executable
+  cd releases\distribution-1.0.0\schemock-1.0.0
   .\schemock.exe --version
-  .\schemock.exe start ..\..\examples\simple-user.json
+  .\schemock.exe start examples\simple-user.json
   ```
 
-- [ ] Test all example schemas
+- [ ] Test installer (if built)
   ```powershell
-  cd ..\..
-  .\demo-script.ps1
+  # Run installer in test VM or clean system
+  cd releases\distribution-1.0.0
+  .\Schemock-Setup.exe
+  
+  # Test installed version
+  schemock --version
+  schemock start examples\simple-user.json
+  ```
+
+- [ ] Test portable package
+  ```powershell
+  # Extract portable ZIP
+  Expand-Archive releases\distribution-1.0.0\schemock-1.0.0-portable.zip -DestinationPath C:\temp\test-portable
+  
+  # Test portable launchers
+  cd C:\temp\test-portable
+  .\schemock-portable.bat --help
+  .\quick-start.bat
   ```
 
 - [ ] Verify health check works
@@ -143,9 +167,18 @@
 
 ### Phase 5: Create Release (20 minutes)
 
-- [ ] Build release package
+- [ ] Review build reports
   ```powershell
-  npm run build:all
+  # Check build summary
+  type releases\distribution-1.0.0\BUILD-SUMMARY.txt
+  
+  # Review detailed report
+  cat releases\distribution-1.0.0\BUILD-REPORT.json
+  ```
+
+- [ ] Verify all packages are ready
+  ```powershell
+  dir releases\distribution-1.0.0
   ```
 
 - [ ] Go to GitHub → Releases → "Create a new release"
@@ -156,10 +189,11 @@
   
 - [ ] Write release notes (use template below)
 
-- [ ] Upload release assets:
-  - [ ] `schemock.exe` (from dist/executable/)
-  - [ ] `Schemock-Setup.exe` (if built)
-  - [ ] `schemock-portable.zip` (if created)
+- [ ] Upload release assets from `releases/distribution-1.0.0/`:
+  - [ ] `Schemock-Setup.exe` (Windows installer)
+  - [ ] `schemock-1.0.0-portable.zip` (Portable package)
+  - [ ] `SHA256SUMS.txt` (Checksums for verification)
+  - [ ] `BUILD-SUMMARY.txt` (Build information)
 
 - [ ] Check "Set as latest release"
 
@@ -184,18 +218,46 @@ Transform JSON schemas into live RESTful APIs in seconds!
 
 ### 📥 Download
 
-- **Windows Executable**: `schemock.exe` (Standalone, no dependencies)
-- **Windows Installer**: `Schemock-Setup.exe` (With Start Menu shortcuts)
-- **Portable**: `schemock-portable.zip` (Extract and run)
+Choose your preferred installation method:
+
+**Windows Installer** (Recommended for most users)
+- Download: `Schemock-Setup.exe`
+- Professional installation wizard
+- Automatic Start Menu shortcuts
+- Optional PATH integration
+- Size: ~30-50 MB
+
+**Portable Package** (For developers & USB use)
+- Download: `schemock-1.0.0-portable.zip`
+- No installation required
+- Run from any location
+- USB stick compatible
+- Size: ~25-40 MB
+
+**Verification**
+- Download: `SHA256SUMS.txt`
+- Verify package integrity:
+  ```powershell
+  certutil -hashfile Schemock-Setup.exe SHA256
+  # Compare with SHA256SUMS.txt
+  ```
 
 ### 🚀 Quick Start
 
-```powershell
-# Download schemock.exe
-# No installation needed!
+**Using Installer:**
+1. Download and run `Schemock-Setup.exe`
+2. Follow installation wizard
+3. Launch from Start Menu or type `schemock` in terminal
 
+**Using Portable:**
+1. Download and extract `schemock-1.0.0-portable.zip`
+2. Run `schemock-portable.bat` or `quick-start.bat`
+3. Or use PowerShell: `.\schemock-portable.ps1`
+
+**First Command:**
+```powershell
 # Start with example schema
-.\schemock.exe start examples\simple-user.json
+schemock start examples\simple-user.json
 
 # Open browser to http://localhost:3000/api/data
 ```

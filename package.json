@@ -15,10 +15,13 @@
     "build:exe": "npm run build && pkg . --out-path dist/executable",
     "build:release": "node scripts/build.js",
     "build:installer": "node scripts/build-installer.js",
+    "build:portable": "node scripts/build-portable.js",
+    "build:distribution": "node scripts/build-distribution.js",
     "build:installer-ui": "cd installer-ui && npm install && npm run build:win",
     "build:all": "node scripts/build-complete.js",
     "build:docs": "node scripts/generate-pdf.js",
-    "clean": "rm -rf dist releases installer-ui/node_modules",
+    "clean": "rm -rf dist releases installer-ui/node_modules coverage",
+    "verify:checksums": "node scripts/verify-checksums.js",
     "prepare": "npm run build"
   },
   "keywords": [
