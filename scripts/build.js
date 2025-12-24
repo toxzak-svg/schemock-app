@@ -29,20 +29,48 @@ function cleanBuild() {
   console.log('🧹 Cleaning previous builds...');
   
   try {
+    // Kill any running schemock processes first
+    if (process.platform === 'win32') {
+      try {
+        execSync('taskkill /F /IM schemock.exe 2>nul', { stdio: 'ignore' });
+        execSync('timeout /t 1 /nobreak >nul 2>&1', { stdio: 'ignore' });
+      } catch (e) {
+        // Process not running, continue
+      }
+    }
+    
     if (fs.existsSync(config.buildDir)) {
-      fs.rmSync(config.buildDir, { recursive: true, force: true });
-      console.log(`  ✅ Removed ${config.buildDir}/`);
+      try {
+        fs.rmSync(config.buildDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+        console.log(`  ✅ Removed ${config.buildDir}/`);
+      } catch (error) {
+        console.log(`  ⚠️  Could not remove ${config.buildDir}/, renaming instead`);
+        const oldName = `${config.buildDir}.old.${Date.now()}`;
+        fs.renameSync(config.buildDir, oldName);
+        console.log(`  ✅ Renamed to ${oldName}/`);
+      }
     }
     
     if (fs.existsSync(config.releaseDir)) {
-      fs.rmSync(config.releaseDir, { recursive: true, force: true });
-      console.log(`  ✅ Removed ${config.releaseDir}/`);
+      try {
+        fs.rmSync(config.releaseDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+        console.log(`  ✅ Removed ${config.releaseDir}/`);
+      } catch (error) {
+        console.log(`  ⚠️  Could not remove ${config.releaseDir}/, renaming instead`);
+        const oldName = `${config.releaseDir}.old.${Date.now()}`;
+        try {
+          fs.renameSync(config.releaseDir, oldName);
+          console.log(`  ✅ Renamed to ${oldName}/`);
+        } catch (renameError) {
+          console.log(`  ⚠️  Could not rename, continuing anyway...`);
+        }
+      }
     }
     
     console.log('✅ Cleanup completed\n');
   } catch (error) {
-    console.error('❌ Cleanup failed:', error.message);
-    throw error;
+    console.error('⚠️  Cleanup had issues but continuing:', error.message);
+    // Don't throw, just continue
   }
 }
 

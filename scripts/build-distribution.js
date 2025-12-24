@@ -65,6 +65,19 @@ function cleanAll() {
   
   console.log('🧹 Cleaning all build artifacts...');
   
+  // First, kill any running schemock processes that might lock files
+  try {
+    console.log('  🔍 Checking for running schemock processes...');
+    if (process.platform === 'win32') {
+      execSync('taskkill /F /IM schemock.exe 2>nul', { stdio: 'ignore' });
+      // Give it a moment to release file handles
+      execSync('timeout /t 1 /nobreak >nul 2>&1', { stdio: 'ignore' });
+      console.log('  ✅ Stopped any running schemock processes');
+    }
+  } catch (error) {
+    // Process might not be running, that's ok
+  }
+  
   const dirsToClean = [
     'dist',
     'releases',
@@ -73,8 +86,51 @@ function cleanAll() {
 
   dirsToClean.forEach(dir => {
     if (fs.existsSync(dir)) {
-      fs.rmSync(dir, { recursive: true, force: true });
-      console.log(`  ✅ Removed ${dir}/`);
+      try {
+        // Try to remove with retries for Windows lock issues
+        let attempts = 0;
+        const maxAttempts = 3;
+        let success = false;
+        
+        while (attempts < maxAttempts && !success) {
+          try {
+            fs.rmSync(dir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+            success = true;
+            console.log(`  ✅ Removed ${dir}/`);
+          } catch (err) {
+            attempts++;
+            if (attempts >= maxAttempts) {
+              throw err;
+            }
+            // Wait a bit before retrying (Windows only)
+            if (process.platform === 'win32') {
+              try {
+                execSync('timeout /t 1 /nobreak >nul 2>&1', { stdio: 'ignore' });
+              } catch (e) {
+                // Timeout command might fail, use setTimeout instead
+                const endTime = Date.now() + 500;
+                while (Date.now() < endTime) { /* busy wait */ }
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.log(`  ⚠️  Warning: Could not remove ${dir}/`);
+        console.log(`     ${error.message}`);
+        console.log(`     Renaming to ${dir}.old and continuing...`);
+        
+        // Try to rename instead of delete
+        try {
+          const oldName = `${dir}.old.${Date.now()}`;
+          fs.renameSync(dir, oldName);
+          console.log(`  ✅ Renamed ${dir}/ to ${oldName}/`);
+        } catch (renameError) {
+          console.log(`  ❌ Could not rename either. You may need to manually delete ${dir}/`);
+          console.log(`     Continuing anyway...`);
+        }
+      }
+    } else {
+      console.log(`  ℹ️  ${dir}/ does not exist (skipping)`);
     }
   });
 

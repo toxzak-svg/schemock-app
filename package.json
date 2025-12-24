@@ -20,7 +20,8 @@
     "build:installer-ui": "cd installer-ui && npm install && npm run build:win",
     "build:all": "node scripts/build-complete.js",
     "build:docs": "node scripts/generate-pdf.js",
-    "clean": "rm -rf dist releases installer-ui/node_modules coverage",
+    "clean": "node -e \"const fs=require('fs');['dist','releases','coverage'].forEach(d=>{if(fs.existsSync(d))fs.rmSync(d,{recursive:true,force:true,maxRetries:5,retryDelay:200})})\"",
+    "clean:force": "powershell -ExecutionPolicy Bypass -File clean-build.ps1 -Force",
     "verify:checksums": "node scripts/verify-checksums.js",
     "prepare": "npm run build"
   },
