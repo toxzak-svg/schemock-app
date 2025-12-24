@@ -76,16 +76,38 @@ export function startInstallerServer(port: number = 3000) {
 
   app.post('/api/exit', (req, res) => {
     res.json({ success: true });
-    setTimeout(() => process.exit(0), 1000);
+    console.log('Installer closing via API...');
+    setTimeout(() => {
+      server.close();
+      process.exit(0);
+    }, 1000);
   });
 
   // Start server
   const server = app.listen(port, () => {
     console.log(`Installer UI running at http://localhost:${port}`);
+    console.log(`Press Ctrl+C to close the installer`);
     
     // Open browser
     const startCommand = process.platform === 'win32' ? 'start' : 'open';
     exec(`${startCommand} http://localhost:${port}`);
+  });
+
+  // Keep the process alive - don't exit on SIGINT unless requested
+  let shutdownRequested = false;
+  
+  process.on('SIGINT', () => {
+    if (!shutdownRequested) {
+      shutdownRequested = true;
+      console.log('\nClosing installer...');
+      server.close();
+      process.exit(0);
+    }
+  });
+
+  process.on('SIGTERM', () => {
+    server.close();
+    process.exit(0);
   });
 
   return server;

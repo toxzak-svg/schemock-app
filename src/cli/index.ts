@@ -302,11 +302,14 @@ program
   .command('install')
   .description('Launch the interactive installer')
   .option('-p, --port <number>', 'Port to run the installer UI on', '3000')
-  .action((options) => {
+  .action(async (options) => {
     try {
       const port = validatePort(options.port);
       console.log(chalk.blue(`🚀 Launching installer UI...`));
-      startInstallerServer(port);
+      const server = startInstallerServer(port);
+      
+      // Keep the process running
+      await new Promise(() => {}); // Never resolves, keeps process alive
     } catch (error: unknown) {
       const message = error instanceof Error ? formatError(error) : 'Unknown error occurred';
       console.error(chalk.red('❌ Error launching installer:'));

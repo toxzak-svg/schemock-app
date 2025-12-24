@@ -255,11 +255,13 @@ program
     .command('install')
     .description('Launch the interactive installer')
     .option('-p, --port <number>', 'Port to run the installer UI on', '3000')
-    .action((options) => {
+    .action(async (options) => {
     try {
         const port = (0, validation_1.validatePort)(options.port);
         console.log(chalk_1.default.blue(`🚀 Launching installer UI...`));
-        (0, server_1.startInstallerServer)(port);
+        const server = (0, server_1.startInstallerServer)(port);
+        // Keep the process running
+        await new Promise(() => { }); // Never resolves, keeps process alive
     }
     catch (error) {
         const message = error instanceof Error ? (0, errors_1.formatError)(error) : 'Unknown error occurred';
