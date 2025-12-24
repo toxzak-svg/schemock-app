@@ -5,11 +5,10 @@ import { ServerOptions } from './types';
  * Main entry point for the Schemock application
  * @param schema - The JSON schema to generate mock data from
  * @param options - Server configuration options
+ * @returns ServerGenerator instance (not started)
  */
 export function createMockServer(schema: any, options: ServerOptions = { port: 3000 }) {
-  const server = ServerGenerator.generateFromSchema(schema, options);
-  server.start();
-  return server;
+  return ServerGenerator.generateFromSchema(schema, options);
 }
 
 // If this file is run directly, start a simple mock server
@@ -41,6 +40,11 @@ if (require.main === module) {
     cors: true
   });
 
+  server.start().catch((error) => {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  });
+
   // Handle shutdown gracefully
   process.on('SIGINT', () => {
     console.log('\nShutting down server...');
@@ -53,3 +57,4 @@ export * from './generators/server';
 export * from './parsers/schema';
 export * from './errors';
 export * from './utils/validation';
+export * from './utils/watcher';

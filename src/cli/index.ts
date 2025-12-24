@@ -14,6 +14,7 @@ import {
   validateLogLevel,
   validateProjectName
 } from '../utils/validation';
+import { SchemaWatcher } from '../utils/watcher';
 
 const program = new Command();
 
@@ -29,7 +30,8 @@ program
   .option('-p, --port <number>', 'Port to run the server on', '3000')
   .option('--no-cors', 'Disable CORS')
   .option('--log-level <level>', 'Log level (error, warn, info, debug)', 'info')
-  .action((schemaPath, options) => {
+  .option('-w, --watch', 'Watch schema file for changes and auto-reload')
+  .action(async (schemaPath, options) => {
     try {
       let schema: Schema = {
         type: 'object',
@@ -66,6 +68,7 @@ program
       // Validate options
       const port = validatePort(options.port);
       const logLevel = validateLogLevel(options.logLevel);
+      const watchMode = options.watch || false;
 
       console.log(chalk.blue(`🚀 Starting mock server on port ${port}...`));
       console.log(chalk.blue(`🔌 CORS: ${options.cors ? 'enabled' : 'disabled'}`));
@@ -73,6 +76,9 @@ program
       
       if (schemaPath) {
         console.log(chalk.blue(`📄 Using schema: ${resolve(process.cwd(), schemaPath)}`));
+        if (watchMode) {
+          console.log(chalk.blue(`👁️  Watch mode: enabled`));
+        }
       }
 
       const server = createMockServer(schema, {
@@ -81,8 +87,60 @@ program
         logLevel
       });
 
+      await server.start();
+
       console.log(chalk.green(`✅ Server running at http://localhost:${port}`));
       console.log(chalk.blue('🛑 Press Ctrl+C to stop the server'));
+
+      // Setup watch mode if enabled and schema path provided
+      if (watchMode && schemaPath) {
+        const watcher = new SchemaWatcher();
+        const absolutePath = validateFilePath(schemaPath);
+        
+        watcher.on('change', async (changedPath: string) => {
+          try {
+            console.log(chalk.yellow(`\n🔄 Reloading schema...`));
+            
+            // Read and validate new schema
+            const newContent = readFileSync(changedPath, 'utf-8');
+            const newSchema = JSON.parse(newContent);
+            validateSchema(newSchema);
+            
+            // Create new server config
+            const newServerConfig = createMockServer(newSchema, {
+              port,
+              cors: options.cors,
+              logLevel
+            }).getConfig();
+            
+            // Restart server with new configuration
+            await server.restart(newServerConfig);
+            
+            console.log(chalk.green(`✅ Server reloaded successfully`));
+            console.log(chalk.blue(`📄 Using updated schema from: ${changedPath}`));
+          } catch (error: unknown) {
+            const message = error instanceof Error ? formatError(error) : 'Unknown error occurred';
+            console.error(chalk.red(`❌ Error reloading schema:`));
+            console.error(chalk.red(message));
+            console.log(chalk.yellow(`⚠️  Server continues running with previous schema`));
+          }
+        });
+
+        watcher.on('error', (error: Error) => {
+          console.error(chalk.red(`❌ Watcher error: ${error.message}`));
+        });
+
+        watcher.watch(absolutePath);
+
+        // Cleanup on exit
+        process.on('SIGINT', async () => {
+          console.log(chalk.yellow('\n\n🛑 Shutting down...'));
+          await watcher.close();
+          await server.stop();
+          console.log(chalk.green('✅ Server stopped'));
+          process.exit(0);
+        });
+      }
 
     } catch (error: unknown) {
       const message = error instanceof Error ? formatError(error) : 'Unknown error occurred';

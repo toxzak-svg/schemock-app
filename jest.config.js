@@ -10,5 +10,8 @@ module.exports = {
     '/node_modules/',
     '/dist/'
   ],
-  testTimeout: 10000
+  testTimeout: 10000,
+  moduleNameMapper: {
+    '^chokidar$': '<rootDir>/__mocks__/chokidar.ts'
+  }
 };

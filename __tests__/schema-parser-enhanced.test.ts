@@ -96,6 +96,7 @@ describe('SchemaParser - Enhanced Tests', () => {
         properties: {
           user: { $ref: '#/definitions/NonExistent' }
         },
+        required: ['user'],
         definitions: {}
       };
 

@@ -4,6 +4,7 @@ import { ServerOptions } from './types';
  * Main entry point for the Schemock application
  * @param schema - The JSON schema to generate mock data from
  * @param options - Server configuration options
+ * @returns ServerGenerator instance (not started)
  */
 export declare function createMockServer(schema: any, options?: ServerOptions): ServerGenerator;
 export * from './types';
@@ -11,3 +12,4 @@ export * from './generators/server';
 export * from './parsers/schema';
 export * from './errors';
 export * from './utils/validation';
+export * from './utils/watcher';

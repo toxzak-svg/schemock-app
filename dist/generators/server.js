@@ -8,8 +8,10 @@ exports.createMockServer = createMockServer;
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const schema_1 = require("../parsers/schema");
+const errors_1 = require("../errors");
 class ServerGenerator {
     constructor(config) {
+        this.server = null;
         this.config = config;
         this.app = (0, express_1.default)();
         this.parser = new schema_1.SchemaParser();
@@ -101,10 +103,10 @@ class ServerGenerator {
                 throw new Error(`Unsupported HTTP method: ${method}`);
         }
     }
-    start() {
+    async start() {
         return new Promise((resolve, reject) => {
             const port = this.config.server.port || 3000;
-            const server = this.app.listen(port, () => {
+            this.server = this.app.listen(port, () => {
                 console.log(`Mock server is running on http://localhost:${port}`);
                 // Log all available routes
                 if (this.config.server.logLevel === 'debug') {
@@ -116,9 +118,9 @@ class ServerGenerator {
                 }
                 resolve();
             });
-            server.on('error', (error) => {
+            this.server.on('error', (error) => {
                 if (error.code === 'EADDRINUSE') {
-                    reject(new Error(`Port ${port} is already in use. Please use a different port.`));
+                    reject(new errors_1.PortError(`Port ${port} is already in use`, port));
                 }
                 else {
                     reject(error);
@@ -126,8 +128,52 @@ class ServerGenerator {
             });
         });
     }
+    /**
+     * Stop the server gracefully
+     */
+    async stop() {
+        if (!this.server) {
+            return;
+        }
+        return new Promise((resolve, reject) => {
+            this.server.close((err) => {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    this.server = null;
+                    resolve();
+                }
+            });
+        });
+    }
+    /**
+     * Restart the server with new configuration
+     */
+    async restart(newConfig) {
+        await this.stop();
+        if (newConfig) {
+            this.config = newConfig;
+            this.app = (0, express_1.default)();
+            this.setupMiddleware();
+            this.setupRoutes();
+        }
+        await this.start();
+    }
+    /**
+     * Check if server is running
+     */
+    isRunning() {
+        return this.server !== null && this.server.listening;
+    }
     getApp() {
         return this.app;
+    }
+    /**
+     * Get current server configuration
+     */
+    getConfig() {
+        return this.config;
     }
     static generateFromSchema(schema, options = { port: 3000 }) {
         const port = options.port || 3000;

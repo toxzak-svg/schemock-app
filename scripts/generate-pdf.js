@@ -1,0 +1,102 @@
+const markdownpdf = require("markdown-pdf");
+const fs = require("fs");
+const path = require("path");
+
+const inputPath = path.join(__dirname, "../docs/quickstart-guide.md");
+const outputPath = path.join(__dirname, "../docs/quickstart-guide.pdf");
+
+const options = {
+  cssPath: path.join(__dirname, "../docs/pdf-styles.css"),
+  paperFormat: "A4",
+  paperBorder: "2cm",
+  remarkable: {
+    html: true,
+    breaks: true,
+    plugins: [],
+    syntax: ["footnote", "sup", "sub"],
+  },
+};
+
+// Create a simple CSS file for styling if it doesn't exist
+const cssPath = path.join(__dirname, "../docs/pdf-styles.css");
+const cssContent = `
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 12pt;
+  line-height: 1.6;
+  color: #333;
+}
+h1 {
+  color: #2c3e50;
+  border-bottom: 2px solid #2c3e50;
+  padding-bottom: 10px;
+  margin-top: 0;
+}
+h2 {
+  color: #34495e;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 5px;
+  margin-top: 30px;
+}
+h3 {
+  color: #7f8c8d;
+  margin-top: 20px;
+}
+code {
+  background-color: #f8f9fa;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: "Consolas", "Monaco", monospace;
+  font-size: 0.9em;
+}
+pre {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 5px;
+  border: 1px solid #e9ecef;
+  overflow-x: auto;
+}
+pre code {
+  background-color: transparent;
+  padding: 0;
+}
+blockquote {
+  border-left: 4px solid #3498db;
+  margin: 0;
+  padding-left: 15px;
+  color: #7f8c8d;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+th {
+  background-color: #f2f2f2;
+}
+a {
+  color: #3498db;
+  text-decoration: none;
+}
+.page-break {
+  page-break-after: always;
+}
+`;
+
+if (!fs.existsSync(cssPath)) {
+  fs.writeFileSync(cssPath, cssContent);
+  console.log("Created CSS file for PDF styling.");
+}
+
+console.log("Generating PDF...");
+
+markdownpdf(options)
+  .from(inputPath)
+  .to(outputPath, function () {
+    console.log("PDF created successfully at:", outputPath);
+  });

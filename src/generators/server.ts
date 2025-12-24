@@ -1,12 +1,15 @@
 import express, { Application, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
+import { Server } from 'http';
 import { ServerOptions, RouteConfig, MockServerConfig } from '../types';
 import { SchemaParser } from '../parsers/schema';
+import { PortError } from '../errors';
 
 export class ServerGenerator {
   private app: Application;
   private config: MockServerConfig;
   private parser: SchemaParser;
+  private server: Server | null = null;
 
   constructor(config: MockServerConfig) {
     this.config = config;
@@ -109,11 +112,11 @@ export class ServerGenerator {
     }
   }
 
-  public start(): Promise<void> {
+  public async start(): Promise<void> {
     return new Promise((resolve, reject) => {
       const port = this.config.server.port || 3000;
       
-      const server = this.app.listen(port, () => {
+      this.server = this.app.listen(port, () => {
         console.log(`Mock server is running on http://localhost:${port}`);
         
         // Log all available routes
@@ -128,9 +131,9 @@ export class ServerGenerator {
         resolve();
       });
 
-      server.on('error', (error: NodeJS.ErrnoException) => {
+      this.server.on('error', (error: NodeJS.ErrnoException) => {
         if (error.code === 'EADDRINUSE') {
-          reject(new Error(`Port ${port} is already in use. Please use a different port.`));
+          reject(new PortError(`Port ${port} is already in use`, port));
         } else {
           reject(error);
         }
@@ -138,8 +141,58 @@ export class ServerGenerator {
     });
   }
 
+  /**
+   * Stop the server gracefully
+   */
+  public async stop(): Promise<void> {
+    if (!this.server) {
+      return;
+    }
+
+    return new Promise((resolve, reject) => {
+      this.server!.close((err) => {
+        if (err) {
+          reject(err);
+        } else {
+          this.server = null;
+          resolve();
+        }
+      });
+    });
+  }
+
+  /**
+   * Restart the server with new configuration
+   */
+  public async restart(newConfig?: MockServerConfig): Promise<void> {
+    await this.stop();
+    
+    if (newConfig) {
+      this.config = newConfig;
+      this.app = express();
+      this.setupMiddleware();
+      this.setupRoutes();
+    }
+    
+    await this.start();
+  }
+
+  /**
+   * Check if server is running
+   */
+  public isRunning(): boolean {
+    return this.server !== null && this.server.listening;
+  }
+
   public getApp(): Application {
     return this.app;
+  }
+
+  /**
+   * Get current server configuration
+   */
+  public getConfig(): MockServerConfig {
+    return this.config;
   }
 
   public static generateFromSchema(schema: any, options: Omit<ServerOptions, 'port'> & { port?: number } = { port: 3000 }): ServerGenerator {

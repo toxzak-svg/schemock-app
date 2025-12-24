@@ -11,6 +11,7 @@ const chalk_1 = __importDefault(require("chalk"));
 const __1 = require("..");
 const errors_1 = require("../errors");
 const validation_1 = require("../utils/validation");
+const watcher_1 = require("../utils/watcher");
 const program = new commander_1.Command();
 program
     .name('schemock')
@@ -23,7 +24,8 @@ program
     .option('-p, --port <number>', 'Port to run the server on', '3000')
     .option('--no-cors', 'Disable CORS')
     .option('--log-level <level>', 'Log level (error, warn, info, debug)', 'info')
-    .action((schemaPath, options) => {
+    .option('-w, --watch', 'Watch schema file for changes and auto-reload')
+    .action(async (schemaPath, options) => {
     try {
         let schema = {
             type: 'object',
@@ -54,19 +56,66 @@ program
         // Validate options
         const port = (0, validation_1.validatePort)(options.port);
         const logLevel = (0, validation_1.validateLogLevel)(options.logLevel);
+        const watchMode = options.watch || false;
         console.log(chalk_1.default.blue(`🚀 Starting mock server on port ${port}...`));
         console.log(chalk_1.default.blue(`🔌 CORS: ${options.cors ? 'enabled' : 'disabled'}`));
         console.log(chalk_1.default.blue(`📝 Log level: ${logLevel}`));
         if (schemaPath) {
             console.log(chalk_1.default.blue(`📄 Using schema: ${(0, path_1.resolve)(process.cwd(), schemaPath)}`));
+            if (watchMode) {
+                console.log(chalk_1.default.blue(`👁️  Watch mode: enabled`));
+            }
         }
         const server = (0, __1.createMockServer)(schema, {
             port,
             cors: options.cors,
             logLevel
         });
+        await server.start();
         console.log(chalk_1.default.green(`✅ Server running at http://localhost:${port}`));
         console.log(chalk_1.default.blue('🛑 Press Ctrl+C to stop the server'));
+        // Setup watch mode if enabled and schema path provided
+        if (watchMode && schemaPath) {
+            const watcher = new watcher_1.SchemaWatcher();
+            const absolutePath = (0, validation_1.validateFilePath)(schemaPath);
+            watcher.on('change', async (changedPath) => {
+                try {
+                    console.log(chalk_1.default.yellow(`\n🔄 Reloading schema...`));
+                    // Read and validate new schema
+                    const newContent = (0, fs_1.readFileSync)(changedPath, 'utf-8');
+                    const newSchema = JSON.parse(newContent);
+                    (0, validation_1.validateSchema)(newSchema);
+                    // Create new server config
+                    const newServerConfig = (0, __1.createMockServer)(newSchema, {
+                        port,
+                        cors: options.cors,
+                        logLevel
+                    }).getConfig();
+                    // Restart server with new configuration
+                    await server.restart(newServerConfig);
+                    console.log(chalk_1.default.green(`✅ Server reloaded successfully`));
+                    console.log(chalk_1.default.blue(`📄 Using updated schema from: ${changedPath}`));
+                }
+                catch (error) {
+                    const message = error instanceof Error ? (0, errors_1.formatError)(error) : 'Unknown error occurred';
+                    console.error(chalk_1.default.red(`❌ Error reloading schema:`));
+                    console.error(chalk_1.default.red(message));
+                    console.log(chalk_1.default.yellow(`⚠️  Server continues running with previous schema`));
+                }
+            });
+            watcher.on('error', (error) => {
+                console.error(chalk_1.default.red(`❌ Watcher error: ${error.message}`));
+            });
+            watcher.watch(absolutePath);
+            // Cleanup on exit
+            process.on('SIGINT', async () => {
+                console.log(chalk_1.default.yellow('\n\n🛑 Shutting down...'));
+                await watcher.close();
+                await server.stop();
+                console.log(chalk_1.default.green('✅ Server stopped'));
+                process.exit(0);
+            });
+        }
     }
     catch (error) {
         const message = error instanceof Error ? (0, errors_1.formatError)(error) : 'Unknown error occurred';

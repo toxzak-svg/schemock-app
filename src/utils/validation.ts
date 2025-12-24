@@ -10,10 +10,20 @@ import { ValidationError, FileError } from '../errors';
  * Validate and sanitize a port number
  */
 export function validatePort(port: string | number): number {
+  // Reject non-numeric types
+  if (typeof port !== 'string' && typeof port !== 'number') {
+    throw new ValidationError('Port must be a string or number', 'port', typeof port);
+  }
+  
   const portNum = typeof port === 'string' ? parseInt(port, 10) : port;
   
-  if (isNaN(portNum)) {
+  if (isNaN(portNum) || !isFinite(portNum)) {
     throw new ValidationError('Port must be a valid number', 'port', port);
+  }
+  
+  // Reject floating point numbers
+  if (!Number.isInteger(portNum)) {
+    throw new ValidationError('Port must be an integer', 'port', port);
   }
   
   if (portNum < 1 || portNum > 65535) {
@@ -45,30 +55,63 @@ export function validateFilePath(filePath: string, baseDir?: string): string {
     throw new ValidationError('File path contains invalid null bytes', 'filePath', filePath);
   }
   
-  // Resolve to absolute path
-  const absolutePath = isAbsolute(filePath) 
-    ? normalize(filePath)
-    : resolve(process.cwd(), filePath);
+  // Reject absolute paths for security
+  if (isAbsolute(filePath)) {
+    throw new ValidationError(
+      'Absolute paths are not allowed for security reasons',
+      'filePath',
+      filePath
+    );
+  }
   
-  // Check for directory traversal attempts
-  if (baseDir) {
-    const normalizedBase = normalize(baseDir);
-    if (!absolutePath.startsWith(normalizedBase)) {
+  // Check for dangerous patterns BEFORE normalization
+  const dangerousPatterns = [
+    '..',           // Directory traversal
+    '~',            // Home directory
+    '$',            // Environment variables
+    '%',            // URL encoding
+    '\\\\?\\',      // Windows UNC paths
+    'file://',      // File URIs
+    '__proto__',    // Prototype pollution
+    'constructor',  // Prototype pollution
+    'prototype',    // Prototype pollution
+  ];
+  
+  for (const pattern of dangerousPatterns) {
+    if (filePath.includes(pattern)) {
       throw new ValidationError(
-        'File path attempts to access files outside allowed directory',
+        `File path contains disallowed pattern: ${pattern}`,
         'filePath',
         filePath
       );
     }
   }
   
-  // Check for suspicious patterns
-  const suspiciousPatterns = ['..', '~', '$'];
-  const normalizedPath = normalize(filePath);
+  // Check for executable file extensions (security risk)
+  const executableExtensions = ['.exe', '.bat', '.cmd', '.com', '.sh', '.bash'];
+  const lowerPath = filePath.toLowerCase();
+  for (const ext of executableExtensions) {
+    if (lowerPath.endsWith(ext) || lowerPath.includes(ext + '.')) {
+      throw new ValidationError(
+        `File path contains executable extension: ${ext}`,
+        'filePath',
+        filePath
+      );
+    }
+  }
   
-  for (const pattern of suspiciousPatterns) {
-    if (normalizedPath.includes(pattern)) {
-      console.warn(`Warning: File path contains potentially unsafe pattern: ${pattern}`);
+  // Normalize and resolve to absolute path
+  const absolutePath = resolve(process.cwd(), filePath);
+  
+  // If baseDir specified, ensure path is within it
+  if (baseDir) {
+    const normalizedBase = normalize(resolve(baseDir));
+    if (!absolutePath.startsWith(normalizedBase)) {
+      throw new ValidationError(
+        'File path attempts to access files outside allowed directory',
+        'filePath',
+        filePath
+      );
     }
   }
   
@@ -88,13 +131,17 @@ export function validateFileExists(filePath: string): void {
  * Validate JSON Schema structure
  */
 export function validateSchema(schema: any): void {
-  if (!schema || typeof schema !== 'object') {
+  if (!schema || typeof schema !== 'object' || Array.isArray(schema)) {
     throw new ValidationError('Schema must be a valid object', 'schema', schema);
   }
   
-  // Basic schema validation
+  // Basic schema validation - require type or composition keywords
   if (!schema.type && !schema.$ref && !schema.oneOf && !schema.anyOf && !schema.allOf) {
-    console.warn('Warning: Schema has no type or composition keywords. May not generate meaningful data.');
+    throw new ValidationError(
+      'Schema must have a type or composition keyword (oneOf, anyOf, allOf, $ref)',
+      'schema',
+      schema
+    );
   }
   
   // Validate type if present
@@ -149,7 +196,12 @@ export function sanitizeString(input: string, maxLength: number = 1000): string 
   }
   
   // Remove control characters except newlines and tabs
-  return input.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '');
+  let sanitized = input.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '');
+  
+  // Remove shell injection characters
+  sanitized = sanitized.replace(/[|`$;&]/g, '');
+  
+  return sanitized;
 }
 
 /**
@@ -158,7 +210,8 @@ export function sanitizeString(input: string, maxLength: number = 1000): string 
 export function validateProjectName(name: string): string {
   const sanitized = sanitizeString(name, 100);
   
-  // Check for valid npm package name
+  // Check for valid npm package name (allow lowercase, digits, hyphens, underscores)
+  // More permissive to match common npm naming conventions
   const validNamePattern = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/;
   
   if (!validNamePattern.test(sanitized)) {

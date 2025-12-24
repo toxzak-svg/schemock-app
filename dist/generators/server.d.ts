@@ -4,13 +4,30 @@ export declare class ServerGenerator {
     private app;
     private config;
     private parser;
+    private server;
     constructor(config: MockServerConfig);
     private setupMiddleware;
     private logRequest;
     private setupRoutes;
     private setupRoute;
     start(): Promise<void>;
+    /**
+     * Stop the server gracefully
+     */
+    stop(): Promise<void>;
+    /**
+     * Restart the server with new configuration
+     */
+    restart(newConfig?: MockServerConfig): Promise<void>;
+    /**
+     * Check if server is running
+     */
+    isRunning(): boolean;
     getApp(): Application;
+    /**
+     * Get current server configuration
+     */
+    getConfig(): MockServerConfig;
     static generateFromSchema(schema: any, options?: Omit<ServerOptions, 'port'> & {
         port?: number;
     }): ServerGenerator;
