@@ -153,7 +153,25 @@ function createReleaseStructure() {
 
   const releaseVersionDir = path.join(config.releaseDir, `schemock-${config.version}`);
   if (fs.existsSync(releaseVersionDir)) {
-    fs.rmSync(releaseVersionDir, { recursive: true, force: true });
+    try {
+      fs.rmSync(releaseVersionDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+    } catch (error) {
+      // If we can't remove it, try renaming
+      console.log(`  ⚠️  Could not remove ${releaseVersionDir}, renaming...`);
+      try {
+        const oldName = `${releaseVersionDir}.old.${Date.now()}`;
+        fs.renameSync(releaseVersionDir, oldName);
+        console.log(`  ✅ Renamed old version to ${path.basename(oldName)}/`);
+      } catch (renameError) {
+        console.log(`  ⚠️  Could not rename either, creating with unique name...`);
+        // Use a unique name instead
+        const timestamp = Date.now();
+        const uniqueDir = path.join(config.releaseDir, `schemock-${config.version}-${timestamp}`);
+        fs.mkdirSync(uniqueDir, { recursive: true });
+        console.log(`  ✅ Created ${path.basename(uniqueDir)}/`);
+        return uniqueDir;
+      }
+    }
   }
   fs.mkdirSync(releaseVersionDir, { recursive: true });
 
@@ -602,6 +620,10 @@ function main() {
     createExecutable();
     
     const releaseDir = createReleaseStructure();
+    
+    // Save release directory path for downstream scripts
+    fs.writeFileSync('.release-path', releaseDir);
+    
     copyReleaseFiles(releaseDir);
     createVersionInfo(releaseDir);
     createBatchFiles(releaseDir);

@@ -15,9 +15,21 @@ const config = {
   version: require('../package.json').version,
   productName: 'Schemock',
   releaseDir: 'releases',
+  baseReleaseDir: null, // Will be read from .release-path file
   portableDir: null, // Will be set dynamically
   outputZip: null // Will be set dynamically
 };
+
+// Read the actual release directory from the path file created by build.js
+try {
+  const releasePath = fs.readFileSync('.release-path', 'utf8').trim();
+  config.baseReleaseDir = releasePath;
+  console.log(`📂 Using base release: ${config.baseReleaseDir}`);
+} catch (error) {
+  // Fallback to default path
+  config.baseReleaseDir = path.join(config.releaseDir, `schemock-${config.version}`);
+  console.log(`⚠️  Could not read .release-path, using default: ${config.baseReleaseDir}`);
+}
 
 // Set dynamic paths
 config.portableDir = path.join(config.releaseDir, `schemock-${config.version}-portable`);
@@ -89,7 +101,7 @@ function copyExecutable() {
   console.log('📋 Copying executable and core files...');
   
   try {
-    const sourceDir = path.join(config.releaseDir, `schemock-${config.version}`);
+    const sourceDir = config.baseReleaseDir;
     
     // Check if source exists
     if (!fs.existsSync(sourceDir)) {
@@ -132,7 +144,7 @@ function copyDocumentation() {
   console.log('📚 Copying documentation...');
   
   try {
-    const sourceDir = path.join(config.releaseDir, `schemock-${config.version}`, 'docs');
+    const sourceDir = path.join(config.baseReleaseDir, 'docs');
     const destDir = path.join(config.portableDir, 'docs');
     
     if (fs.existsSync(sourceDir)) {
@@ -160,7 +172,7 @@ function copyExamples() {
   console.log('📝 Copying examples...');
   
   try {
-    const sourceDir = path.join(config.releaseDir, `schemock-${config.version}`, 'examples');
+    const sourceDir = path.join(config.baseReleaseDir, 'examples');
     const destDir = path.join(config.portableDir, 'examples');
     
     if (fs.existsSync(sourceDir)) {
