@@ -62,3 +62,5 @@ if (require.main === module) {
 __exportStar(require("./types"), exports);
 __exportStar(require("./generators/server"), exports);
 __exportStar(require("./parsers/schema"), exports);
+__exportStar(require("./errors"), exports);
+__exportStar(require("./utils/validation"), exports);

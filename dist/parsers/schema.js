@@ -1,28 +1,38 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SchemaParser = void 0;
+const errors_1 = require("../errors");
 class SchemaParser {
     /**
      * Parse a JSON schema and generate mock data based on the schema definition
+     * @param schema - The schema to parse
+     * @param rootSchema - Root schema for $ref resolution (defaults to schema)
+     * @param visited - Set of visited references to prevent circular loops
      */
-    static parse(schema) {
+    static parse(schema, rootSchema, visited = new Set()) {
         if (!schema) {
-            throw new Error('Schema is required');
+            throw new errors_1.SchemaParseError('Schema is required');
         }
-        // Handle references and allOf/anyOf/oneOf
+        const root = rootSchema || schema;
+        // Handle references
         if (schema.$ref) {
-            // In a real implementation, you would resolve the reference
-            return 'REF_NOT_IMPLEMENTED';
+            return this.resolveRef(schema.$ref, root, visited);
         }
+        // Handle oneOf/anyOf/allOf
         if (schema.oneOf && schema.oneOf.length > 0) {
-            return this.parse(schema.oneOf[Math.floor(Math.random() * schema.oneOf.length)]);
+            const randomIndex = Math.floor(Math.random() * schema.oneOf.length);
+            return this.parse(schema.oneOf[randomIndex], root, visited);
         }
         if (schema.anyOf && schema.anyOf.length > 0) {
-            return this.parse(schema.anyOf[Math.floor(Math.random() * schema.anyOf.length)]);
+            const randomIndex = Math.floor(Math.random() * schema.anyOf.length);
+            return this.parse(schema.anyOf[randomIndex], root, visited);
         }
         if (schema.allOf && schema.allOf.length > 0) {
             return schema.allOf.reduce((result, subSchema) => {
-                return { ...result, ...this.parse(subSchema) };
+                const parsed = this.parse(subSchema, root, visited);
+                return typeof parsed === 'object' && parsed !== null
+                    ? { ...result, ...parsed }
+                    : parsed;
             }, {});
         }
         // Handle different schema types
@@ -35,19 +45,53 @@ class SchemaParser {
             case 'boolean':
                 return this.generateBoolean();
             case 'array':
-                return this.generateArray(schema);
+                return this.generateArray(schema, root, visited);
             case 'object':
-                return this.generateObject(schema);
+                return this.generateObject(schema, root, visited);
             case 'null':
                 return null;
             default:
                 if (Array.isArray(schema.type)) {
                     // If multiple types are allowed, pick one randomly
                     const randomType = schema.type[Math.floor(Math.random() * schema.type.length)];
-                    return this.parse({ ...schema, type: randomType });
+                    return this.parse({ ...schema, type: randomType }, root, visited);
                 }
                 return 'UNKNOWN_TYPE';
         }
+    }
+    /**
+     * Resolve a JSON Schema $ref reference
+     * @param ref - The reference string (e.g., "#/definitions/User")
+     * @param rootSchema - The root schema containing definitions
+     * @param visited - Set of visited references to prevent circular loops
+     */
+    static resolveRef(ref, rootSchema, visited) {
+        // Check for circular references
+        if (visited.has(ref)) {
+            console.warn(`Circular reference detected: ${ref}`);
+            return null;
+        }
+        // Only handle internal references for now (starting with #/)
+        if (!ref.startsWith('#/')) {
+            console.warn(`External references not supported yet: ${ref}`);
+            return 'EXTERNAL_REF_NOT_SUPPORTED';
+        }
+        // Parse the reference path
+        const path = ref.substring(2).split('/'); // Remove '#/' and split
+        let resolved = rootSchema;
+        // Navigate through the schema
+        for (const part of path) {
+            if (resolved && typeof resolved === 'object' && part in resolved) {
+                resolved = resolved[part];
+            }
+            else {
+                throw new errors_1.SchemaRefError(`Cannot resolve $ref: ${ref}. Path not found: ${part}`, ref);
+            }
+        }
+        // Mark as visited before parsing to catch circular refs
+        visited.add(ref);
+        // Parse the resolved schema
+        return this.parse(resolved, rootSchema, visited);
     }
     static generateString(schema) {
         if (schema.enum) {
@@ -119,7 +163,7 @@ class SchemaParser {
     static generateBoolean() {
         return Math.random() > 0.5;
     }
-    static generateArray(schema) {
+    static generateArray(schema, rootSchema, visited = new Set()) {
         const minItems = schema.minItems || 1;
         const maxItems = schema.maxItems || Math.max(5, minItems);
         const count = minItems + Math.floor(Math.random() * (maxItems - minItems + 1));
@@ -127,31 +171,33 @@ class SchemaParser {
             return [];
         }
         const result = [];
+        const root = rootSchema || schema;
         if (Array.isArray(schema.items)) {
             // Tuple type
             for (let i = 0; i < Math.min(count, schema.items.length); i++) {
-                result.push(this.parse(schema.items[i]));
+                result.push(this.parse(schema.items[i], root, visited));
             }
         }
         else {
             // Array of items with the same schema
             for (let i = 0; i < count; i++) {
-                result.push(this.parse(schema.items));
+                result.push(this.parse(schema.items, root, visited));
             }
         }
         return result;
     }
-    static generateObject(schema) {
+    static generateObject(schema, rootSchema, visited = new Set()) {
         if (!schema.properties) {
             return {};
         }
         const result = {};
         const required = new Set(schema.required || []);
+        const root = rootSchema || schema;
         // Process all properties
         for (const [key, propSchema] of Object.entries(schema.properties)) {
             // Only include required properties and those with a 50% chance for optional ones
             if (required.has(key) || Math.random() > 0.5) {
-                result[key] = this.parse(propSchema);
+                result[key] = this.parse(propSchema, root, visited);
             }
         }
         // Handle additionalProperties
@@ -164,7 +210,7 @@ class SchemaParser {
                 if (!(propName in result)) {
                     result[propName] = typeof schema.additionalProperties === 'boolean'
                         ? 'additional_value'
-                        : this.parse(schema.additionalProperties);
+                        : this.parse(schema.additionalProperties, root, visited);
                 }
             }
         }

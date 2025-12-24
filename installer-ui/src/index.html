@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schemock Installer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .installer-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .installer-header {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid #3498db;
+        }
+
+        .installer-header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .installer-header .version {
+            background: #3498db;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .installer-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .installer-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .installer-footer {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-top: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navigation-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn:disabled {
+            background: #bdc3c7;
+            color: #7f8c8d;
+            cursor: not-allowed;
+        }
+
+        .progress-container {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #ecf0f1;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .welcome-page {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .welcome-page .logo {
+            font-size: 48px;
+            color: #3498db;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .welcome-page .subtitle {
+            font-size: 18px;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+        }
+
+        .welcome-page .description {
+            font-size: 14px;
+            color: #5d6d7e;
+            line-height: 1.6;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .system-requirements {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #3498db;
+        }
+
+        .system-requirements h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .system-requirements ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .system-requirements li {
+            padding: 8px 0;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+        }
+
+        .system-requirements li:last-child {
+            border-bottom: none;
+        }
+
+        .requirement-check {
+            color: #2ecc71;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+
+        .requirement-cross {
+            color: #e74c3c;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .path-browse {
+            display: flex;
+            gap: 10px;
+            align-items: stretch;
+        }
+
+        .path-input {
+            flex: 1;
+        }
+
+        .browse-btn {
+            background: #95a5a6;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .browse-btn:hover {
+            background: #7f8c8d;
+        }
+
+        .component-list {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .component-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .component-item:last-child {
+            border-bottom: none;
+        }
+
+        .component-checkbox {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        .component-name {
+            flex: 1;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .component-size {
+            color: #7f8c8d;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
+        .summary-page {
+            padding: 20px;
+        }
+
+        .summary-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .summary-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .summary-details {
+            background: white;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 4px solid #3498db;
+        }
+
+        .summary-details p {
+            margin: 8px 0;
+            color: #5d6d7e;
+        }
+
+        .summary-details strong {
+            color: #2c3e50;
+        }
+
+        .installation-page {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .installation-icon {
+            font-size: 64px;
+            color: #3498db;
+            margin-bottom: 20px;
+            animation: spin 2s linear infinite;
+        }
+
+        .installation-status {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .installation-message {
+            font-size: 14px;
+            color: #7f8c8d;
+            line-height: 1.6;
+        }
+
+        .success-page {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .success-icon {
+            font-size: 64px;
+            color: #2ecc71;
+            margin-bottom: 20px;
+        }
+
+        .success-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .success-message {
+            font-size: 16px;
+            color: #7f8c8d;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .success-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="installer-container">
+        <header class="installer-header">
+            <h1>
+                🚀 Schemock Installer
+                <span class="version">v1.0.0</span>
+            </h1>
+            <div class="header-actions">
+                <span id="status-text">Ready</span>
+            </div>
+        </header>
+
+        <!-- Welcome Page -->
+        <div id="welcome-page" class="installer-content active welcome-page">
+            <div class="logo">Schemock</div>
+            <div class="subtitle">Mock Server Generator</div>
+            <div class="description">
+                Welcome to the Schemock installation wizard. This will guide you through the installation process 
+                of Schemock Mock Server Generator on your Windows system.
+            </div>
+            
+            <div class="system-requirements">
+                <h3>System Requirements</h3>
+                <ul>
+                    <li><span class="requirement-check">✓</span> Windows 10 or later (x64)</li>
+                    <li><span class="requirement-check">✓</span> 512MB RAM minimum</li>
+                    <li><span class="requirement-check">✓</span> 100MB free disk space</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Installation Path Page -->
+        <div id="path-page" class="installer-content">
+            <h2>Installation Location</h2>
+            <p>Choose the folder where you want to install Schemock:</p>
+            
+            <div class="form-group">
+                <label for="install-path">Installation Path:</label>
+                <div class="path-browse">
+                    <input type="text" id="install-path" class="form-control path-input" value="C:\Program Files\Schemock">
+                    <button class="browse-btn" onclick="browsePath()">Browse...</button>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Available Space: <span id="available-space">Checking...</span></label>
+                <label>Required Space: 100MB</label>
+            </div>
+        </div>
+
+        <!-- Components Selection Page -->
+        <div id="components-page" class="installer-content">
+            <h2>Select Components</h2>
+            <p>Choose which components to install:</p>
+            
+            <div class="component-list">
+                <div class="component-item">
+                    <input type="checkbox" id="component-core" class="component-checkbox" checked disabled>
+                    <label for="component-core" class="component-name">Schemock Core Application</label>
+                    <span class="component-size">73MB</span>
+                </div>
+                
+                <div class="component-item">
+                    <input type="checkbox" id="component-docs" class="component-checkbox" checked>
+                    <label for="component-docs" class="component-name">Documentation</label>
+                    <span class="component-size">5MB</span>
+                </div>
+                
+                <div class="component-item">
+                    <input type="checkbox" id="component-examples" class="component-checkbox" checked>
+                    <label for="component-examples" class="component-name">Example Schemas</label>
+                    <span class="component-size">1MB</span>
+                </div>
+                
+                <div class="component-item">
+                    <input type="checkbox" id="component-start-menu" class="component-checkbox" checked>
+                    <label for="component-start-menu" class="component-name">Start Menu Shortcuts</label>
+                    <span class="component-size">< 1MB</span>
+                </div>
+                
+                <div class="component-item">
+                    <input type="checkbox" id="component-desktop" class="component-checkbox" checked>
+                    <label for="component-desktop" class="component-name">Desktop Shortcut</label>
+                    <span class="component-size">< 1MB</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Page -->
+        <div id="summary-page" class="installer-content summary-page">
+            <h2>Ready to Install</h2>
+            <p>Please review the installation summary below:</p>
+            
+            <div class="summary-section">
+                <h3>Installation Details</h3>
+                <div class="summary-details">
+                    <p><strong>Version:</strong> <span id="summary-version">1.0.0</span></p>
+                    <p><strong>Location:</strong> <span id="summary-path">C:\Program Files\Schemock</span></p>
+                    <p><strong>Components:</strong> <span id="summary-components">All selected</span></p>
+                </div>
+            </div>
+            
+            <div class="summary-section">
+                <h3>System Requirements</h3>
+                <div class="summary-details">
+                    <p><strong>OS:</strong> Windows 10 or later</p>
+                    <p><strong>Architecture:</strong> x64</p>
+                    <p><strong>Memory:</strong> 512MB RAM minimum</p>
+                    <p><strong>Disk Space:</strong> 100MB required</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Installation Progress Page -->
+        <div id="installation-page" class="installer-content installation-page">
+            <div class="installation-icon">⚙️</div>
+            <div class="installation-status">Installing Schemock...</div>
+            <div class="installation-message" id="installation-message">Preparing installation...</div>
+            
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill">
+                        <span class="progress-text" id="progress-text">0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success Page -->
+        <div id="success-page" class="installer-content success-page">
+            <div class="success-icon">✅</div>
+            <div class="success-title">Installation Complete!</div>
+            <div class="success-message">
+                Schemock has been successfully installed on your system. You can now start using it immediately 
+                from the Start Menu or Desktop shortcuts.
+            </div>
+            <div class="success-actions">
+                <button class="btn btn-primary" onclick="launchApplication()">Launch Schemock</button>
+                <button class="btn btn-secondary" onclick="closeInstaller()">Close</button>
+            </div>
+        </div>
+
+        <footer class="installer-footer">
+            <div class="navigation-buttons">
+                <button id="btn-back" class="btn btn-secondary" onclick="navigateBack()" style="display: none;">Back</button>
+                <button id="btn-next" class="btn btn-primary" onclick="navigateNext()">Next</button>
+                <button id="btn-cancel" class="btn btn-secondary" onclick="cancelInstallation()">Cancel</button>
+                <button id="btn-install" class="btn btn-primary" onclick="startInstallation()" style="display: none;">Install</button>
+            </div>
+            <div class="footer-info">
+                <span>© 2023 Schemock Team. All rights reserved.</span>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+        
+        let currentPage = 'welcome';
+        let appConfig = {};
+        let installerState = {};
+        
+        // Page navigation
+        const pages = ['welcome', 'path', 'components', 'summary', 'installation', 'success'];
+        let currentPageIndex = 0;
+
+        // Initialize
+        async function init() {
+            try {
+                appConfig = await ipcRenderer.invoke('get-app-config');
+                installerState = await ipcRenderer.invoke('get-installer-state');
+                document.getElementById('install-path').value = installerState.installPath || 'C:\\Program Files\\Schemock';
+                updateUI();
+            } catch (error) {
+                console.error('Failed to initialize:', error);
+            }
+        }
+
+        function updateUI() {
+            // Update header
+            document.getElementById('status-text').textContent = currentPage.charAt(0).toUpperCase() + currentPage.slice(1);
+            
+            // Update navigation buttons
+            updateNavigationButtons();
+            
+            // Update component states
+            updateComponentStates();
+        }
+
+        function updateNavigationButtons() {
+            const btnBack = document.getElementById('btn-back');
+            const btnNext = document.getElementById('btn-next');
+            const btnInstall = document.getElementById('btn-install');
+            const btnCancel = document.getElementById('btn-cancel');
+            
+            // Hide all buttons first
+            btnBack.style.display = 'none';
+            btnNext.style.display = 'none';
+            btnInstall.style.display = 'none';
+            
+            switch (currentPage) {
+                case 'welcome':
+                    btnNext.style.display = 'inline-block';
+                    btnCancel.style.display = 'inline-block';
+                    break;
+                case 'path':
+                    btnBack.style.display = 'inline-block';
+                    btnNext.style.display = 'inline-block';
+                    btnCancel.style.display = 'inline-block';
+                    break;
+                case 'components':
+                    btnBack.style.display = 'inline-block';
+                    btnNext.style.display = 'inline-block';
+                    btnCancel.style.display = 'inline-block';
+                    break;
+                case 'summary':
+                    btnBack.style.display = 'inline-block';
+                    btnInstall.style.display = 'inline-block';
+                    btnCancel.style.display = 'inline-block';
+                    break;
+                case 'installation':
+                    btnCancel.style.display = 'inline-block';
+                    break;
+                case 'success':
+                    btnCancel.style.display = 'inline-block';
+                    break;
+            }
+        }
+
+        function updateComponentStates() {
+            if (installerState.selectedComponents) {
+                document.getElementById('component-docs').checked = installerState.selectedComponents.documentation;
+                document.getElementById('component-examples').checked = installerState.selectedComponents.examples;
+                document.getElementById('component-start-menu').checked = installerState.selectedComponents.startMenu;
+                document.getElementById('component-desktop').checked = installerState.selectedComponents.desktopShortcut;
+            }
+        }
+
+        function navigateTo(page) {
+            // Hide current page
+            document.querySelectorAll('.installer-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Show new page
+            document.getElementById(page + '-page').classList.add('active');
+            
+            currentPage = page;
+            updateUI();
+            
+            // Update summary if navigating to summary
+            if (page === 'summary') {
+                updateSummary();
+            }
+            
+            // Notify main process
+            ipcRenderer.invoke('navigate-to', page);
+        }
+
+        function navigateBack() {
+            if (currentPageIndex > 0) {
+                currentPageIndex--;
+                navigateTo(pages[currentPageIndex]);
+            }
+        }
+
+        function navigateNext() {
+            if (currentPageIndex < pages.length - 1) {
+                // Validate current page before proceeding
+                if (validateCurrentPage()) {
+                    currentPageIndex++;
+                    navigateTo(pages[currentPageIndex]);
+                }
+            }
+        }
+
+        function validateCurrentPage() {
+            switch (currentPage) {
+                case 'path':
+                    const installPath = document.getElementById('install-path').value;
+                    if (!installPath || installPath.trim() === '') {
+                        showMessage('error', 'Installation Path', 'Please select a valid installation path.');
+                        return false;
+                    }
+                    return true;
+                default:
+                    return true;
+            }
+        }
+
+        function updateSummary() {
+            const installPath = document.getElementById('install-path').value;
+            document.getElementById('summary-version').textContent = appConfig.version;
+            document.getElementById('summary-path').textContent = installPath;
+            
+            const selectedComponents = [];
+            if (document.getElementById('component-docs').checked) selectedComponents.push('Documentation');
+            if (document.getElementById('component-examples').checked) selectedComponents.push('Examples');
+            if (document.getElementById('component-start-menu').checked) selectedComponents.push('Start Menu');
+            if (document.getElementById('component-desktop').checked) selectedComponents.push('Desktop');
+            
+            document.getElementById('summary-components').textContent = 
+                selectedComponents.length === 0 ? 'None selected' : selectedComponents.join(', ');
+        }
+
+        async function startInstallation() {
+            try {
+                // Save current settings
+                const installPath = document.getElementById('install-path').value;
+                const components = {
+                    documentation: document.getElementById('component-docs').checked,
+                    examples: document.getElementById('component-examples').checked,
+                    startMenu: document.getElementById('component-start-menu').checked,
+                    desktopShortcut: document.getElementById('component-desktop').checked
+                };
+                
+                await ipcRenderer.invoke('set-install-path', installPath);
+                await ipcRenderer.invoke('set-components', components);
+                
+                navigateTo('installation');
+                
+                // Start installation
+                const result = await ipcRenderer.invoke('start-installation');
+                
+            } catch (error) {
+                showMessage('error', 'Installation Failed', `Installation failed: ${error.message}`);
+            }
+        }
+
+        async function browsePath() {
+            try {
+                const path = await ipcRenderer.invoke('browse-install-path');
+                if (path) {
+                    document.getElementById('install-path').value = path;
+                }
+            } catch (error) {
+                showMessage('error', 'Browse Error', `Failed to browse: ${error.message}`);
+            }
+        }
+
+        function launchApplication() {
+            const { shell } = require('electron');
+            shell.openExternal('schemock:');
+        }
+
+        function closeInstaller() {
+            window.close();
+        }
+
+        function cancelInstallation() {
+            if (currentPage === 'installation') {
+                showMessage('warning', 'Cancel Installation', 
+                    'Are you sure you want to cancel the installation? The application will not be properly installed.',
+                    ['Yes', 'No']
+                ).then(result => {
+                    if (result.response === 0) {
+                        window.close();
+                    }
+                });
+            } else {
+                window.close();
+            }
+        }
+
+        async function showMessage(type, title, message, buttons = ['OK']) {
+            const result = await ipcRenderer.invoke('show-message-box', {
+                type: type,
+                title: title,
+                message: message,
+                buttons: buttons
+            });
+            return result;
+        }
+
+        // IPC event handlers
+        ipcRenderer.on('installation-progress', (event, { progress, message }) => {
+            document.getElementById('progress-fill').style.width = progress + '%';
+            document.getElementById('progress-text').textContent = progress + '%';
+            document.getElementById('installation-message').textContent = message;
+        });
+
+        ipcRenderer.on('installation-complete', (event, { success }) => {
+            if (success) {
+                navigateTo('success');
+            } else {
+                showMessage('error', 'Installation Failed', 
+                    'The installation could not be completed. Please check the logs and try again.');
+            }
+        });
+
+        // Initialize the app
+        init();
+    </script>
+</body>
+</html>

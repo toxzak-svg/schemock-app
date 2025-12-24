@@ -15,8 +15,9 @@
     "build:exe": "npm run build && pkg . --out-path dist/executable",
     "build:release": "node scripts/build.js",
     "build:installer": "node scripts/build-installer.js",
-    "build:all": "npm run build && npm run build:release && npm run build:installer",
-    "clean": "rm -rf dist releases",
+    "build:installer-ui": "cd installer-ui && npm install && npm run build:win",
+    "build:all": "node scripts/build-complete.js",
+    "clean": "rm -rf dist releases installer-ui/node_modules",
     "prepare": "npm run build"
   },
   "keywords": [

@@ -9,6 +9,8 @@ const fs_1 = require("fs");
 const path_1 = require("path");
 const chalk_1 = __importDefault(require("chalk"));
 const __1 = require("..");
+const errors_1 = require("../errors");
+const validation_1 = require("../utils/validation");
 const program = new commander_1.Command();
 program
     .name('schemock')
@@ -30,47 +32,46 @@ program
                 timestamp: { type: 'string', format: 'date-time' }
             }
         };
-        // Load schema from file if provided
+        // Validate and load schema from file if provided
         if (schemaPath) {
-            const absolutePath = (0, path_1.resolve)(process.cwd(), schemaPath);
-            if (!(0, fs_1.existsSync)(absolutePath)) {
-                console.error(chalk_1.default.red(`❌ Schema file not found: ${absolutePath}`));
-                process.exit(1);
-            }
             try {
-                schema = JSON.parse((0, fs_1.readFileSync)(absolutePath, 'utf-8'));
+                const absolutePath = (0, validation_1.validateFilePath)(schemaPath);
+                (0, validation_1.validateFileExists)(absolutePath);
+                const fileContent = (0, fs_1.readFileSync)(absolutePath, 'utf-8');
+                schema = JSON.parse(fileContent);
+                (0, validation_1.validateSchema)(schema);
             }
             catch (error) {
-                const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-                console.error(chalk_1.default.red('❌ Error parsing schema file:'), errorMessage);
-                process.exit(1);
+                if (error instanceof SyntaxError) {
+                    throw new errors_1.FileError(`Invalid JSON in schema file: ${error.message}`, schemaPath, 'parse');
+                }
+                throw error;
             }
         }
         else {
             console.log(chalk_1.default.yellow('ℹ️  No schema provided, using default schema'));
         }
-        const port = parseInt(options.port, 10);
-        if (isNaN(port) || port < 1 || port > 65535) {
-            console.error(chalk_1.default.red('❌ Invalid port number. Please provide a number between 1 and 65535'));
-            process.exit(1);
-        }
+        // Validate options
+        const port = (0, validation_1.validatePort)(options.port);
+        const logLevel = (0, validation_1.validateLogLevel)(options.logLevel);
         console.log(chalk_1.default.blue(`🚀 Starting mock server on port ${port}...`));
         console.log(chalk_1.default.blue(`🔌 CORS: ${options.cors ? 'enabled' : 'disabled'}`));
-        console.log(chalk_1.default.blue(`📝 Log level: ${options.logLevel}`));
+        console.log(chalk_1.default.blue(`📝 Log level: ${logLevel}`));
         if (schemaPath) {
             console.log(chalk_1.default.blue(`📄 Using schema: ${(0, path_1.resolve)(process.cwd(), schemaPath)}`));
         }
         const server = (0, __1.createMockServer)(schema, {
             port,
             cors: options.cors,
-            logLevel: options.logLevel
+            logLevel
         });
         console.log(chalk_1.default.green(`✅ Server running at http://localhost:${port}`));
         console.log(chalk_1.default.blue('🛑 Press Ctrl+C to stop the server'));
     }
     catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-        console.error(chalk_1.default.red('❌ Error starting mock server:'), errorMessage);
+        const message = error instanceof Error ? (0, errors_1.formatError)(error) : 'Unknown error occurred';
+        console.error(chalk_1.default.red('❌ Error starting mock server:'));
+        console.error(chalk_1.default.red(message));
         process.exit(1);
     }
 });
@@ -82,21 +83,29 @@ program
     .option('--port <port>', 'Default port', '3000')
     .action((directory = '.', options) => {
     try {
+        // Validate project name
+        const projectName = (0, validation_1.validateProjectName)(options.name);
+        const port = (0, validation_1.validatePort)(options.port);
         const projectDir = (0, path_1.resolve)(process.cwd(), directory);
         // Create project directory if it doesn't exist
         if (!(0, fs_1.existsSync)(projectDir)) {
             (0, fs_1.mkdirSync)(projectDir, { recursive: true });
         }
+        // Check if directory is empty (except for hidden files)
+        const files = require('fs').readdirSync(projectDir).filter((f) => !f.startsWith('.'));
+        if (files.length > 0) {
+            throw new errors_1.ConfigurationError(`Directory is not empty: ${projectDir}. Please use an empty directory or specify a new one.`, { directory: projectDir, existingFiles: files.length });
+        }
         // Create package.json
         const packageJson = {
-            name: options.name,
+            name: projectName,
             version: '1.0.0',
             description: 'A mock server generated with Schemock',
             main: 'index.js',
             scripts: {
                 start: 'node index.js',
                 dev: 'nodemon index.js',
-                test: 'echo \"Error: no test specified\" && exit 1'
+                test: 'echo "Error: no test specified" && exit 1'
             },
             dependencies: {
                 express: '^4.18.2',
@@ -112,7 +121,7 @@ program
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const app = express();
-const port = ${options.port};
+const port = ${port};
 
 // Middleware
 app.use(cors());
@@ -131,10 +140,23 @@ app.get('/api/example', (req, res) => {
   });
 });
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Error:', err.message);
+  res.status(500).json({ error: 'Internal server error' });
+});
+
 // Start server
 app.listen(port, () => {
   console.log(\`🚀 Server running at http://localhost:\${port}\`);
   console.log('📝 Example API available at /api/example');
+}).on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(\`❌ Port \${port} is already in use. Please use a different port.\`);
+  } else {
+    console.error('❌ Server error:', err.message);
+  }
+  process.exit(1);
 });
 `;
         // Create a sample schema file
@@ -163,17 +185,18 @@ app.listen(port, () => {
         (0, fs_1.writeFileSync)((0, path_1.join)(projectDir, 'package.json'), JSON.stringify(packageJson, null, 2));
         (0, fs_1.writeFileSync)((0, path_1.join)(projectDir, 'index.js'), serverCode);
         (0, fs_1.writeFileSync)((0, path_1.join)(projectDir, 'example-schema.json'), JSON.stringify(sampleSchema, null, 2));
-        (0, fs_1.writeFileSync)((0, path_1.join)(projectDir, '.gitignore'), 'node_modules/\n.env\n.DS_Store\n');
+        (0, fs_1.writeFileSync)((0, path_1.join)(projectDir, '.gitignore'), 'node_modules/\n.env\n.DS_Store\n*.log\n');
         console.log(chalk_1.default.green(`✅ Project initialized in ${projectDir}`));
         console.log(chalk_1.default.blue('👉 Next steps:'));
-        console.log(chalk_1.default.blue(`  cd ${directory}`));
+        console.log(chalk_1.default.blue(`  cd ${directory !== '.' ? directory : 'your-project'}`));
         console.log(chalk_1.default.blue('  npm install'));
         console.log(chalk_1.default.blue('  npm start'));
         console.log(chalk_1.default.blue('\nEdit index.js to customize your mock server'));
     }
     catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-        console.error(chalk_1.default.red('❌ Error initializing project:'), errorMessage);
+        const message = error instanceof Error ? (0, errors_1.formatError)(error) : 'Unknown error occurred';
+        console.error(chalk_1.default.red('❌ Error initializing project:'));
+        console.error(chalk_1.default.red(message));
         process.exit(1);
     }
 });

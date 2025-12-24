@@ -1,0 +1,51 @@
+{
+  "name": "schemock-installer",
+  "version": "1.0.0",
+  "description": "Schemock Professional Installer",
+  "main": "src/main.js",
+  "homepage": "./",
+  "author": "Schemock Team",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "dist": "npm run build"
+  },
+  "dependencies": {
+    "electron": "^25.9.0",
+    "electron-log": "^4.4.8",
+    "fs-extra": "^10.1.0"
+  },
+  "devDependencies": {
+    "electron-builder": "^24.6.4",
+    "@electron/rebuild": "^3.2.13"
+  },
+  "build": {
+    "appId": "com.schemock.installer",
+    "productName": "Schemock Installer",
+    "directories": {
+      "output": "dist-installer"
+    },
+    "files": [
+      "src/**/*",
+      "assets/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Schemock"
+    }
+  }
+}

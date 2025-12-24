@@ -109,19 +109,32 @@ export class ServerGenerator {
     }
   }
 
-  public start(): void {
-    const port = this.config.server.port || 3000;
-    this.app.listen(port, () => {
-      console.log(`Mock server is running on http://localhost:${port}`);
+  public start(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const port = this.config.server.port || 3000;
       
-      // Log all available routes
-      if (this.config.server.logLevel === 'debug') {
-        console.log('\nAvailable routes:');
-        Object.entries(this.config.routes).forEach(([path, config]) => {
-          console.log(`  ${config.method.toUpperCase()} ${path}`);
-        });
-        console.log('');
-      }
+      const server = this.app.listen(port, () => {
+        console.log(`Mock server is running on http://localhost:${port}`);
+        
+        // Log all available routes
+        if (this.config.server.logLevel === 'debug') {
+          console.log('\nAvailable routes:');
+          Object.entries(this.config.routes).forEach(([path, config]) => {
+            console.log(`  ${config.method.toUpperCase()} ${path}`);
+          });
+          console.log('');
+        }
+        
+        resolve();
+      });
+
+      server.on('error', (error: NodeJS.ErrnoException) => {
+        if (error.code === 'EADDRINUSE') {
+          reject(new Error(`Port ${port} is already in use. Please use a different port.`));
+        } else {
+          reject(error);
+        }
+      });
     });
   }
 

@@ -9,7 +9,7 @@ export declare class ServerGenerator {
     private logRequest;
     private setupRoutes;
     private setupRoute;
-    start(): void;
+    start(): Promise<void>;
     getApp(): Application;
     static generateFromSchema(schema: any, options?: Omit<ServerOptions, 'port'> & {
         port?: number;

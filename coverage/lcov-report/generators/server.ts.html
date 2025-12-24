@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">62.12% </span>
+                <span class="strong">56.94% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>41/66</span>
+                <span class='fraction'>41/72</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">38.46% </span>
+                <span class="strong">35.71% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>10/26</span>
+                <span class='fraction'>10/28</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">57.89% </span>
+                <span class="strong">52.38% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>11/19</span>
+                <span class='fraction'>11/21</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">63.07% </span>
+                <span class="strong">57.74% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>41/65</span>
+                <span class='fraction'>41/71</span>
             </div>
         
             
@@ -232,7 +232,20 @@
 <a name='L167'></a><a href='#L167'>167</a>
 <a name='L168'></a><a href='#L168'>168</a>
 <a name='L169'></a><a href='#L169'>169</a>
-<a name='L170'></a><a href='#L170'>170</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L170'></a><a href='#L170'>170</a>
+<a name='L171'></a><a href='#L171'>171</a>
+<a name='L172'></a><a href='#L172'>172</a>
+<a name='L173'></a><a href='#L173'>173</a>
+<a name='L174'></a><a href='#L174'>174</a>
+<a name='L175'></a><a href='#L175'>175</a>
+<a name='L176'></a><a href='#L176'>176</a>
+<a name='L177'></a><a href='#L177'>177</a>
+<a name='L178'></a><a href='#L178'>178</a>
+<a name='L179'></a><a href='#L179'>179</a>
+<a name='L180'></a><a href='#L180'>180</a>
+<a name='L181'></a><a href='#L181'>181</a>
+<a name='L182'></a><a href='#L182'>182</a>
+<a name='L183'></a><a href='#L183'>183</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
@@ -346,6 +359,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -355,6 +370,17 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -512,19 +538,32 @@ export class ServerGenerator {
     }
   }
 &nbsp;
-  public <span class="fstat-no" title="function not covered" >start(</span>): void {
-    const port = <span class="cstat-no" title="statement not covered" >this.config.server.port || 3000;</span>
-<span class="cstat-no" title="statement not covered" >    this.app.listen(port, <span class="fstat-no" title="function not covered" >() =</span>&gt; {</span>
-<span class="cstat-no" title="statement not covered" >      console.log(`Mock server is running on http://localhost:${port}`);</span>
+  public <span class="fstat-no" title="function not covered" >start(</span>): Promise&lt;void&gt; {
+<span class="cstat-no" title="statement not covered" >    return new Promise(<span class="fstat-no" title="function not covered" >(r</span>esolve, reject) =&gt; {</span>
+      const port = <span class="cstat-no" title="statement not covered" >this.config.server.port || 3000;</span>
       
-      // Log all available routes
-<span class="cstat-no" title="statement not covered" >      <span class="missing-if-branch" title="if path not taken" >I</span>if (this.config.server.logLevel === 'debug') {</span>
-<span class="cstat-no" title="statement not covered" >        console.log('\nAvailable routes:');</span>
-<span class="cstat-no" title="statement not covered" >        Object.entries(this.config.routes).forEach(<span class="fstat-no" title="function not covered" >([</span>path, config]) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >          console.log(`  ${config.method.toUpperCase()} ${path}`);</span>
-        });
-<span class="cstat-no" title="statement not covered" >        console.log('');</span>
-      }
+      const server = <span class="cstat-no" title="statement not covered" >this.app.listen(port, <span class="fstat-no" title="function not covered" >() =</span>&gt; {</span>
+<span class="cstat-no" title="statement not covered" >        console.log(`Mock server is running on http://localhost:${port}`);</span>
+        
+        // Log all available routes
+<span class="cstat-no" title="statement not covered" >        <span class="missing-if-branch" title="if path not taken" >I</span>if (this.config.server.logLevel === 'debug') {</span>
+<span class="cstat-no" title="statement not covered" >          console.log('\nAvailable routes:');</span>
+<span class="cstat-no" title="statement not covered" >          Object.entries(this.config.routes).forEach(<span class="fstat-no" title="function not covered" >([</span>path, config]) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >            console.log(`  ${config.method.toUpperCase()} ${path}`);</span>
+          });
+<span class="cstat-no" title="statement not covered" >          console.log('');</span>
+        }
+        
+<span class="cstat-no" title="statement not covered" >        resolve();</span>
+      });
+&nbsp;
+<span class="cstat-no" title="statement not covered" >      server.on('error', <span class="fstat-no" title="function not covered" >(e</span>rror: NodeJS.ErrnoException) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >        if (error.code === 'EADDRINUSE') {</span>
+<span class="cstat-no" title="statement not covered" >          reject(new Error(`Port ${port} is already in use. Please use a different port.`));</span>
+        } else {
+<span class="cstat-no" title="statement not covered" >          reject(error);</span>
+        }
+      });
     });
   }
 &nbsp;
@@ -577,7 +616,7 @@ export function <span class="fstat-no" title="function not covered" >createMockS
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-12-23T17:22:19.022Z
+                at 2025-12-24T02:01:38.245Z
             </div>
         <script src="../prettify.js"></script>
         <script>

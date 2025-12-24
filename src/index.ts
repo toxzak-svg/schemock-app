@@ -51,3 +51,5 @@ if (require.main === module) {
 export * from './types';
 export * from './generators/server';
 export * from './parsers/schema';
+export * from './errors';
+export * from './utils/validation';
