@@ -1,22 +1,42 @@
-import chokidar, { FSWatcher } from 'chokidar';
 import { EventEmitter } from 'events';
 import { FileError } from '../errors';
 import chalk from 'chalk';
+
+// Dynamically import chokidar to avoid ESM issues in pkg
+let chokidarModule: any = null;
+
+async function getChokidar() {
+  if (!chokidarModule) {
+    try {
+      chokidarModule = await import('chokidar');
+    } catch (error) {
+      console.warn('Chokidar not available, file watching disabled');
+      return null;
+    }
+  }
+  return chokidarModule?.default || chokidarModule;
+}
 
 /**
  * File watcher for schema hot-reload
  */
 export class SchemaWatcher extends EventEmitter {
-  private watcher: FSWatcher | null = null;
+  private watcher: any | null = null;
   private watchedFiles: Set<string> = new Set();
 
   /**
    * Start watching a file for changes
    * @param filePath - Absolute path to the file to watch
    */
-  watch(filePath: string): void {
+  async watch(filePath: string): Promise<void> {
     if (this.watchedFiles.has(filePath)) {
       console.warn(chalk.yellow(`Already watching: ${filePath}`));
+      return;
+    }
+
+    const chokidar = await getChokidar();
+    if (!chokidar) {
+      console.warn(chalk.yellow('File watching is not available in this environment'));
       return;
     }
 

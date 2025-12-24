@@ -107,7 +107,7 @@ program
             watcher.on('error', (error) => {
                 console.error(chalk_1.default.red(`❌ Watcher error: ${error.message}`));
             });
-            watcher.watch(absolutePath);
+            await watcher.watch(absolutePath);
             // Cleanup on exit
             process.on('SIGINT', async () => {
                 console.log(chalk_1.default.yellow('\n\n🛑 Shutting down...'));

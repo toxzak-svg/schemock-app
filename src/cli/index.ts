@@ -131,7 +131,7 @@ program
           console.error(chalk.red(`❌ Watcher error: ${error.message}`));
         });
 
-        watcher.watch(absolutePath);
+        await watcher.watch(absolutePath);
 
         // Cleanup on exit
         process.on('SIGINT', async () => {

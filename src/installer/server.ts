@@ -2,6 +2,7 @@ import express from 'express';
 import * as path from 'path';
 import { InstallerService, APP_CONFIG } from './service';
 import { exec } from 'child_process';
+import { getInstallerHTML } from './ui-template';
 
 export function startInstallerServer(port: number = 3000) {
   const app = express();
@@ -9,10 +10,11 @@ export function startInstallerServer(port: number = 3000) {
 
   app.use(express.json());
   
-  // Serve static UI files
-  // In pkg, we need to be careful about path resolution
-  const uiPath = path.join(__dirname, 'ui');
-  app.use(express.static(uiPath));
+  // Serve the installer UI HTML directly
+  app.get('/', (req, res) => {
+    res.setHeader('Content-Type', 'text/html');
+    res.send(getInstallerHTML());
+  });
 
   // API Endpoints
   app.get('/api/config', (req, res) => {
