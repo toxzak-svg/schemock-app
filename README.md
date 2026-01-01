@@ -22,7 +22,24 @@
 
 ## 🚀 Quick Start
 
-### Download & Run (Recommended)
+### One-Command Installation (Recommended)
+
+**macOS / Linux:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/toxzak-svg/schemock-app/main/install.sh | bash
+```
+
+**Windows (PowerShell):**
+```powershell
+iwr https://raw.githubusercontent.com/toxzak-svg/schemock-app/main/install.ps1 | iex
+```
+
+**Alternative: Scoop (Windows):**
+```powershell
+scoop install https://raw.githubusercontent.com/toxzak-svg/schemock-app/main/schemock.json
+```
+
+### Download & Run
 
 **[📥 Download v1.0.0 Portable](https://github.com/toxzak-svg/schemock-app/releases/latest)** (25 MB)
 
@@ -50,12 +67,11 @@ schemock init my-api
 ```
 
 **See it in action:**
-1. Open http://localhost:3000/api/data
-2. Get realistic mock data instantly
+1. Open http://localhost:3000/ - **New!** Interactive API Playground
+2. Explore http://localhost:3000/api/data - Get realistic mock data instantly
 3. Use in your frontend code right away
 
 ```json
-// Example response
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
   "name": "John Doe",
@@ -67,15 +83,50 @@ schemock init my-api
 
 ---
 
-## 💡 Use Cases
+## 💡 Frontend-First Workflow
 
-| Scenario | Benefit |
-|----------|---------|
-| **Frontend Development** | Build UI components before backend APIs exist |
-| **API Design** | Prototype and test API contracts quickly |
-| **Demos & Presentations** | Show working features without backend complexity |
-| **Testing** | Generate consistent mock data for test suites |
-| **Learning** | Understand REST APIs without backend setup |
+Schemock is explicitly optimized for frontend teams blocked by backend development. Whether you're using **React**, **Vue**, **Svelte**, or **Next.js**, Schemock fits right into your dev loop.
+
+### Why frontend teams love it:
+- **Zero setup**: Just point it at a JSON schema and start coding.
+- **Realistic delays**: Test your loading states with `--scenario slow`.
+- **Error handling**: Test how your UI handles 400s and 500s with `--scenario error-heavy`.
+- **API Playground**: Visual interface at `/` to explore endpoints and test requests.
+
+### 📚 Integration Recipes
+- [Using Schemock with Vite dev server](docs/recipes.md#%E2%9A%A1-using-schemock-with-vite-dev-server)
+- [Next.js with API routes disabled](docs/recipes.md#-with-nextjs-api-routes-disabled)
+- [Cypress E2E testing with Schemock](docs/recipes.md#-with-cypress-tests)
+- [Storybook API mocking](docs/recipes.md#%F0%9F%8E%A8-with-storybook)
+
+---
+
+## 💎 Open Source vs Pro
+
+| Feature | Open Source (MIT) | Pro / Team |
+|---------|:---:|:---:|
+| Core Mocking Engine | ✅ | ✅ |
+| JSON Schema Support | ✅ | ✅ |
+| CRUD Generation | ✅ | ✅ |
+| Interactive Playground | ✅ | ✅ |
+| CLI Tool | ✅ | ✅ |
+| **Pre-built Binaries** | ❌ (Build yourself) | ✅ |
+| **One-click Installers** | ❌ | ✅ |
+| **Priority Support** | ❌ | ✅ |
+| **Commercial Usage** | MIT Terms | Perpetual License |
+| **v2.x Upgrades** | ❌ | ✅ (Enterprise) |
+
+[View full licensing details & pricing](COMMERCIAL-LICENSE.md)
+
+---
+
+## 🤝 Social Proof
+
+### Who uses Schemock?
+*Used by teams at innovative startups and fast-moving agencies:*
+- **PixelPerfect UI** - *"Saved us 4 days of waiting for the backend team on our last sprint."*
+- **DataFlow Systems** - *"The best way to prototype API contracts with stakeholders."*
+- **DevLaunch Agency** - *"Our go-to tool for rapid prototyping React apps."*
 
 ---
 
@@ -91,23 +142,130 @@ schemock start schema.json --port 8080
 # Watch mode (auto-reload on changes)
 schemock start schema.json --watch
 
+# Use a preset scenario (happy-path, slow, error-heavy, sad-path)
+schemock start schema.json --scenario sad-path
+
+# Strict mode (enforce constraints and validate requests)
+schemock start schema.json --strict
+
+# Validate schema and show human-readable hints
+schemock validate schema.json
+
 # Initialize new project
 schemock init my-api
+
+# Generate CRUD schema for a resource
+schemock crud product
+
+# Integrate with a Vite project
+schemock init-vite
 
 # Get help
 schemock --help
 schemock start --help
 ```
 
+## ⚡ Vite & React Integration
+
+Schemock is a first-class citizen for Vite-based frontends. You can integrate it directly into your Vite dev server for a seamless "one-command" development experience.
+
+### 1. Automatic Integration (Recommended)
+
+Run the following command in your Vite project root:
+
+```bash
+schemock init-vite
+```
+
+This will:
+- Create a `mocks/` directory with a sample schema.
+- Add a `mock` script to your `package.json`.
+- Provide instructions for adding the Schemock Vite plugin.
+
+### 2. Manual Integration
+
+**Install Schemock:**
+```bash
+npm install --save-dev schemock
+```
+
+**Add to `vite.config.ts`:**
+```typescript
+import { defineConfig } from 'vite';
+import { schemockVitePlugin } from 'schemock';
+
+export default defineConfig({
+  plugins: [
+    schemockVitePlugin({
+      schemaPath: 'mocks/api.json', // Path to your schema
+      prefix: '/api',              // API prefix to proxy
+      port: 3001                   // Mock server port
+    })
+  ]
+});
+```
+
+Now, when you run `npm run dev`, Schemock will start automatically and any requests to `/api` will be served by your mock server!
+
 ## ✨ Features
 
 ### Core Capabilities
 - ✅ **JSON Schema → REST API** - Instant transformation from schema to endpoint
+- ✅ **Multi-Endpoint DSL** - Define multiple paths and methods in one schema
+- ✅ **CRUD Generator** - Template generator for common resource patterns
 - ✅ **GET & POST Support** - Read data and echo responses
 - ✅ **Health Check** - Built-in `/health` endpoint for monitoring
 - ✅ **CORS Enabled** - No configuration needed for web apps
 - ✅ **Hot Reload** - Watch mode detects schema changes automatically
 - ✅ **Zero Config** - Works out of the box with sensible defaults
+
+### 🛠️ Multi-Endpoint DSL
+You can define multiple routes in a single schema file using the `x-schemock-routes` property. This allows you to build complex mock APIs with a single configuration.
+
+```json
+{
+  "x-schemock-routes": [
+    {
+      "path": "/api/users",
+      "method": "get",
+      "response": {
+        "type": "array",
+        "items": { "$ref": "#/definitions/User" },
+        "minItems": 5
+      }
+    },
+    {
+      "path": "/api/users/:id",
+      "method": "get",
+      "response": { "$ref": "#/definitions/User" }
+    },
+    {
+      "path": "/api/users",
+      "method": "post",
+      "statusCode": 201,
+      "response": { "success": true, "message": "User created" }
+    }
+  ],
+  "definitions": {
+    "User": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "name": { "type": "string" }
+      }
+    }
+  }
+}
+```
+
+### 📦 CRUD Generator
+Schemock can automatically generate a full CRUD (Create, Read, Update, Delete) API for any resource name you provide.
+
+```bash
+schemock crud product
+```
+
+This will create a `product-crud.json` file with all standard RESTful endpoints pre-configured and linked to a generated `Product` definition.
 
 ### Data Generation
 - ✅ **Realistic Formats** - UUIDs, emails, dates, URIs generated correctly
@@ -273,6 +431,19 @@ schemock start schema.json --log-level debug
 schemock start schema.json --no-cors
 ```
 
+### Preset Scenarios
+Test how your frontend handles delays and errors:
+```bash
+# Simulate a slow network (1-3s delays)
+schemock start schema.json --scenario slow
+
+# Simulate an unreliable API (random 4xx/5xx errors)
+schemock start schema.json --scenario error-heavy
+
+# Simulate the worst-case "sad path" (both slow and unreliable)
+schemock start schema.json --scenario sad-path
+```
+
 ### All Options
 ```bash
 schemock start [schemaPath] [options]
@@ -282,6 +453,7 @@ Options:
   -w, --watch              Watch for schema changes
   --no-cors                Disable CORS
   --log-level <level>      Log level: error, warn, info, debug
+  --scenario <preset>      Preset scenario: happy-path, slow, error-heavy, sad-path
   -h, --help               Display help
 ```
 
@@ -291,26 +463,28 @@ Options:
 
 ### Server Options
 
-```javascript
+```json
 {
-  port: 3000,              // Server port (1-65535)
-  basePath?: string,         // Base path for all routes
-  watch?: boolean,           // Watch for file changes
-  cors?: boolean,            // Enable/disable CORS
-  logLevel?: 'error' | 'warn' | 'info' | 'debug'
+  "port": 3000,
+  "basePath": "/api",
+  "watch": true,
+  "cors": true,
+  "logLevel": "info",
+  "scenario": "happy-path",
+  "strict": false
 }
 ```
 
 ### Route Configuration
 
-```javascript
+```json
 {
-  path: string,              // Route path
-  method: 'get' | 'post' | 'put' | 'delete' | 'patch',
-  response: any,            // Response data or function
-  statusCode?: number,      // HTTP status code (default: 200)
-  delay?: number,           // Response delay in milliseconds
-  headers?: Record<string, string> // Custom headers
+  "path": "/users",
+  "method": "get",
+  "response": { "status": "ok" },
+  "statusCode": 200,
+  "delay": 0,
+  "headers": { "X-Custom": "Value" }
 }
 ```
 

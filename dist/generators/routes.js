@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateRouteConfigs = generateRouteConfigs;
 exports.generateRoutes = generateRoutes;
+exports.generateCRUDDSL = generateCRUDDSL;
 /**
  * Generate route handlers based on the provided schema
  * @param schema - The JSON schema to generate routes for
@@ -175,4 +176,67 @@ router.delete('/', (req, res) => {
 });
 
 module.exports = router;`;
+}
+/**
+ * Generate a CRUD DSL for a resource
+ * @param resourceName - The name of the resource (e.g., 'User')
+ * @returns Array of route definitions
+ */
+function generateCRUDDSL(resourceName) {
+    const resourceNamePlural = `${resourceName.toLowerCase()}s`;
+    return [
+        {
+            path: `/api/${resourceNamePlural}`,
+            method: 'get',
+            response: {
+                type: 'array',
+                items: { $ref: `#/definitions/${resourceName}` },
+                minItems: 5,
+                maxItems: 20
+            }
+        },
+        {
+            path: `/api/${resourceNamePlural}/:id`,
+            method: 'get',
+            response: { $ref: `#/definitions/${resourceName}` }
+        },
+        {
+            path: `/api/${resourceNamePlural}`,
+            method: 'post',
+            response: {
+                type: 'object',
+                properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: `#/definitions/${resourceName}` },
+                    message: { type: 'string' }
+                },
+                required: ['success', 'data']
+            },
+            statusCode: 201
+        },
+        {
+            path: `/api/${resourceNamePlural}/:id`,
+            method: 'put',
+            response: {
+                type: 'object',
+                properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: `#/definitions/${resourceName}` }
+                },
+                required: ['success', 'data']
+            }
+        },
+        {
+            path: `/api/${resourceNamePlural}/:id`,
+            method: 'delete',
+            response: {
+                type: 'object',
+                properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' }
+                },
+                required: ['success', 'message']
+            }
+        }
+    ];
 }

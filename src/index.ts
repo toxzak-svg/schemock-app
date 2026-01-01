@@ -58,3 +58,4 @@ export * from './parsers/schema';
 export * from './errors';
 export * from './utils/validation';
 export * from './utils/watcher';
+export * from './integrations/vite';

@@ -28,24 +28,40 @@ export interface Schema {
   allOf?: Schema[];
   not?: Schema;
   const?: any;
+  'x-schemock-routes'?: RouteDefinition[];
   [key: string]: any; // Allow for additional properties
 }
+
+export interface RouteDefinition {
+  path: string;
+  method: 'get' | 'post' | 'put' | 'delete' | 'patch';
+  response: any; // Can be a fixed object or a Schema to be parsed
+  statusCode?: number;
+  delay?: number;
+  headers?: Record<string, string>;
+}
+
+export type Scenario = 'happy-path' | 'slow' | 'error-heavy' | 'sad-path';
 
 export interface ServerOptions {
   port: number;
   basePath?: string;
+  resourceName?: string;
   watch?: boolean;
   cors?: boolean;
   logLevel?: 'error' | 'warn' | 'info' | 'debug';
+  scenario?: Scenario;
+  strict?: boolean;
 }
 
 export interface RouteConfig {
   path: string;
   method: 'get' | 'post' | 'put' | 'delete' | 'patch';
-  response: any;
+  response: any | ((req: any, state?: any) => any);
   statusCode?: number;
   delay?: number;
   headers?: Record<string, string>;
+  schema?: any;
 }
 
 export interface MockServerConfig {

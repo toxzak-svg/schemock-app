@@ -35,15 +35,16 @@ describe('ServerGenerator', () => {
     const data = await response.json() as {
       message: string;
       timestamp: string;
-      data: { id: string; name: string };
+      data: Array<{ id: string; name: string }>;
     };
     
     expect(response.status).toBe(200);
     expect(data).toHaveProperty('message');
     expect(data).toHaveProperty('timestamp');
     expect(data).toHaveProperty('data');
-    expect(typeof data.data.id).toBe('string');
-    expect(typeof data.data.name).toBe('string');
+    expect(Array.isArray(data.data)).toBe(true);
+    expect(typeof data.data[0].id).toBe('string');
+    expect(typeof data.data[0].name).toBe('string');
   });
 
   it('should support POST requests', async () => {

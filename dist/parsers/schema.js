@@ -8,28 +8,29 @@ class SchemaParser {
      * @param schema - The schema to parse
      * @param rootSchema - Root schema for $ref resolution (defaults to schema)
      * @param visited - Set of visited references to prevent circular loops
+     * @param strict - Whether to enforce strict validation
      */
-    static parse(schema, rootSchema, visited = new Set()) {
+    static parse(schema, rootSchema, visited = new Set(), strict = false) {
         if (!schema) {
             throw new errors_1.SchemaParseError('Schema is required');
         }
         const root = rootSchema || schema;
         // Handle references
         if (schema.$ref) {
-            return this.resolveRef(schema.$ref, root, visited);
+            return this.resolveRef(schema.$ref, root, visited, strict);
         }
         // Handle oneOf/anyOf/allOf
         if (schema.oneOf && schema.oneOf.length > 0) {
             const randomIndex = Math.floor(Math.random() * schema.oneOf.length);
-            return this.parse(schema.oneOf[randomIndex], root, visited);
+            return this.parse(schema.oneOf[randomIndex], root, visited, strict);
         }
         if (schema.anyOf && schema.anyOf.length > 0) {
             const randomIndex = Math.floor(Math.random() * schema.anyOf.length);
-            return this.parse(schema.anyOf[randomIndex], root, visited);
+            return this.parse(schema.anyOf[randomIndex], root, visited, strict);
         }
         if (schema.allOf && schema.allOf.length > 0) {
             return schema.allOf.reduce((result, subSchema) => {
-                const parsed = this.parse(subSchema, root, visited);
+                const parsed = this.parse(subSchema, root, visited, strict);
                 return typeof parsed === 'object' && parsed !== null
                     ? { ...result, ...parsed }
                     : parsed;
@@ -38,23 +39,27 @@ class SchemaParser {
         // Handle different schema types
         switch (schema.type) {
             case 'string':
-                return this.generateString(schema);
+                return this.generateString(schema, strict);
             case 'number':
             case 'integer':
-                return this.generateNumber(schema);
+                return this.generateNumber(schema, strict);
             case 'boolean':
                 return this.generateBoolean();
             case 'array':
-                return this.generateArray(schema, root, visited);
+                return this.generateArray(schema, root, visited, strict);
             case 'object':
-                return this.generateObject(schema, root, visited);
+                return this.generateObject(schema, root, visited, strict);
             case 'null':
                 return null;
             default:
                 if (Array.isArray(schema.type)) {
                     // If multiple types are allowed, pick one randomly
                     const randomType = schema.type[Math.floor(Math.random() * schema.type.length)];
-                    return this.parse({ ...schema, type: randomType }, root, visited);
+                    return this.parse({ ...schema, type: randomType }, root, visited, strict);
+                }
+                // Loose mode fallback for unknown type
+                if (!strict && schema.properties) {
+                    return this.generateObject(schema, root, visited, strict);
                 }
                 return 'UNKNOWN_TYPE';
         }
@@ -64,8 +69,9 @@ class SchemaParser {
      * @param ref - The reference string (e.g., "#/definitions/User")
      * @param rootSchema - The root schema containing definitions
      * @param visited - Set of visited references to prevent circular loops
+     * @param strict - Whether to enforce strict validation
      */
-    static resolveRef(ref, rootSchema, visited) {
+    static resolveRef(ref, rootSchema, visited, strict = false) {
         // Check for circular references
         if (visited.has(ref)) {
             console.warn(`Circular reference detected: ${ref}`);
@@ -91,9 +97,12 @@ class SchemaParser {
         // Mark as visited before parsing to catch circular refs
         visited.add(ref);
         // Parse the resolved schema
-        return this.parse(resolved, rootSchema, visited);
+        const result = this.parse(resolved, rootSchema, visited, strict);
+        // Remove from visited so it can be used in other branches
+        visited.delete(ref);
+        return result;
     }
-    static generateString(schema) {
+    static generateString(schema, strict = false) {
         if (schema.enum) {
             return schema.enum[Math.floor(Math.random() * schema.enum.length)];
         }
@@ -132,26 +141,32 @@ class SchemaParser {
         }
         return result;
     }
-    static generateNumber(schema) {
-        let min = typeof schema.minimum === 'number' ? schema.minimum : 0;
-        let max = typeof schema.maximum === 'number' ? schema.maximum : 100;
+    static generateNumber(schema, strict = false) {
+        let min = typeof schema.minimum === 'number' ? schema.minimum : (strict ? 0 : -100);
+        let max = typeof schema.maximum === 'number' ? schema.maximum : (strict ? 100 : 1000);
+        // In strict mode, if multipleOf is present, ensures values are strictly compliant
+        if (strict && schema.multipleOf && min % schema.multipleOf !== 0) {
+            min = Math.ceil(min / schema.multipleOf) * schema.multipleOf;
+        }
         // Handle exclusive minimum/maximum
         if (schema.exclusiveMinimum !== undefined) {
             if (typeof schema.exclusiveMinimum === 'boolean' && schema.exclusiveMinimum) {
-                min += 1;
+                min += (schema.multipleOf || 1);
             }
             else if (typeof schema.exclusiveMinimum === 'number') {
-                min = schema.exclusiveMinimum + 1;
+                min = schema.exclusiveMinimum + (schema.multipleOf || 0.01);
             }
         }
         if (schema.exclusiveMaximum !== undefined) {
             if (typeof schema.exclusiveMaximum === 'boolean' && schema.exclusiveMaximum) {
-                max -= 1;
+                max -= (schema.multipleOf || 1);
             }
             else if (typeof schema.exclusiveMaximum === 'number') {
-                max = schema.exclusiveMaximum - 1;
+                max = schema.exclusiveMaximum - (schema.multipleOf || 0.01);
             }
         }
+        if (max < min)
+            max = min + (schema.multipleOf || 1);
         // Handle multipleOf if specified
         if (schema.multipleOf) {
             const range = max - min;
@@ -163,9 +178,9 @@ class SchemaParser {
     static generateBoolean() {
         return Math.random() > 0.5;
     }
-    static generateArray(schema, rootSchema, visited = new Set()) {
-        const minItems = schema.minItems || 1;
-        const maxItems = schema.maxItems || Math.max(5, minItems);
+    static generateArray(schema, rootSchema, visited = new Set(), strict = false) {
+        const minItems = schema.minItems || (strict ? 1 : 0);
+        const maxItems = schema.maxItems || Math.max(minItems + (strict ? 2 : 5), 10);
         const count = minItems + Math.floor(Math.random() * (maxItems - minItems + 1));
         if (!schema.items) {
             return [];
@@ -175,18 +190,18 @@ class SchemaParser {
         if (Array.isArray(schema.items)) {
             // Tuple type
             for (let i = 0; i < Math.min(count, schema.items.length); i++) {
-                result.push(this.parse(schema.items[i], root, visited));
+                result.push(this.parse(schema.items[i], root, visited, strict));
             }
         }
         else {
             // Array of items with the same schema
             for (let i = 0; i < count; i++) {
-                result.push(this.parse(schema.items, root, visited));
+                result.push(this.parse(schema.items, root, visited, strict));
             }
         }
         return result;
     }
-    static generateObject(schema, rootSchema, visited = new Set()) {
+    static generateObject(schema, rootSchema, visited = new Set(), strict = false) {
         if (!schema.properties) {
             return {};
         }
@@ -195,9 +210,11 @@ class SchemaParser {
         const root = rootSchema || schema;
         // Process all properties
         for (const [key, propSchema] of Object.entries(schema.properties)) {
-            // Only include required properties and those with a 50% chance for optional ones
-            if (required.has(key) || Math.random() > 0.5) {
-                result[key] = this.parse(propSchema, root, visited);
+            // In strict mode, always include required properties
+            // In loose mode, or for non-required, have a high chance to include (90%)
+            const isRequired = required.has(key);
+            if (isRequired || !strict || Math.random() > 0.1) {
+                result[key] = this.parse(propSchema, root, visited, strict);
             }
         }
         // Handle additionalProperties
@@ -210,7 +227,7 @@ class SchemaParser {
                 if (!(propName in result)) {
                     result[propName] = typeof schema.additionalProperties === 'boolean'
                         ? 'additional_value'
-                        : this.parse(schema.additionalProperties, root, visited);
+                        : this.parse(schema.additionalProperties, root, visited, strict);
                 }
             }
         }

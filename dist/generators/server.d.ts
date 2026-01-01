@@ -5,6 +5,7 @@ export declare class ServerGenerator {
     private config;
     private parser;
     private server;
+    private state;
     constructor(config: MockServerConfig);
     private setupMiddleware;
     private setupRoutes;

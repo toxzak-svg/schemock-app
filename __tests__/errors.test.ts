@@ -106,8 +106,8 @@ describe('Error Classes', () => {
       const error = new PortError('Port already in use', 3000);
       const formatted = formatError(error);
       
-      expect(formatted).toContain('Suggestions:');
-      expect(formatted).toContain('Try a different port');
+      expect(formatted).toContain('💡 Hint:');
+      expect(formatted).toContain('Try starting with a different port');
       expect(formatted).toContain('3000');
     });
 
@@ -115,8 +115,8 @@ describe('Error Classes', () => {
       const error = new FileError('File not found', '/path/to/file.json', 'read');
       const formatted = formatError(error);
       
-      expect(formatted).toContain('Suggestions:');
-      expect(formatted).toContain('Check if the file exists');
+      expect(formatted).toContain('💡 Hint:');
+      expect(formatted).toContain('Make sure the file at');
       expect(formatted).toContain('/path/to/file.json');
     });
 
@@ -124,8 +124,8 @@ describe('Error Classes', () => {
       const error = new SchemaRefError('Cannot resolve ref', '#/definitions/User');
       const formatted = formatError(error);
       
-      expect(formatted).toContain('Suggestions:');
-      expect(formatted).toContain('Check if the reference path is correct');
+      expect(formatted).toContain('💡 Hint:');
+      expect(formatted).toContain('Verify that the referenced definition exists');
       expect(formatted).toContain('#/definitions/User');
     });
 

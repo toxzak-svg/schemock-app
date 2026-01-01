@@ -46,7 +46,7 @@ This Commercial License Agreement ("Agreement") is between you (either an indivi
 ## License Types
 
 ### Individual License
-- **Price**: One-time payment per user
+- **Price**: $49 (One-time payment)
 - **Users**: Single individual
 - **Devices**: Unlimited devices for that user
 - **Duration**: Perpetual (lifetime)
@@ -54,20 +54,20 @@ This Commercial License Agreement ("Agreement") is between you (either an indivi
 - **Support**: Community support via GitHub
 
 ### Team License
-- **Price**: One-time payment per team (5-25 users)
-- **Users**: Specified number of team members
+- **Price**: $249 (One-time payment, up to 10 users)
+- **Users**: Up to 10 team members
 - **Devices**: Unlimited devices per user
 - **Duration**: Perpetual (lifetime)
 - **Updates**: Includes all v1.x updates
-- **Support**: Priority email support
+- **Support**: Priority email support (48h response)
 
 ### Enterprise License
-- **Price**: Custom pricing for 25+ users
+- **Price**: $999 (One-time payment, unlimited users)
 - **Users**: Unlimited within organization
 - **Devices**: Unlimited
 - **Duration**: Perpetual (lifetime)
 - **Updates**: Includes all v1.x and v2.x updates
-- **Support**: Dedicated support channel
+- **Support**: Dedicated support channel & on-boarding session
 - **Custom**: On-premise deployment assistance
 
 ## Open Source vs Commercial

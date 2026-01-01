@@ -7,6 +7,82 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Realistic Data Generation (Heuristics):**
+  - Enhanced `SchemaParser` with property-name-based heuristics to generate realistic names, emails, phone numbers, prices, cities, and more.
+  - Added support for `date` and `time` formats in JSON Schema.
+  - Improved `ipv4` generation with randomized segments.
+  - Context-aware generation: `SchemaParser` now accepts property name hints for better data guessing.
+- **CLI UX Improvements:**
+  - New `schemock recipes` command to display integration guides (Vite, Next.js, Cypress, Storybook) directly in the terminal.
+  - New `--resource` option for `schemock start` to quickly mock a specific resource without a schema file.
+  - Refined `schemock init` output with clearer "Next steps" and better visual feedback.
+  - Updated default schema for `schemock start` (no args) to include `id`, `name`, and `email` for a more "live" feel.
+- **Project Distribution:**
+  - Added `docs/**/*` to pre-built binary assets, enabling the `recipes` command in standalone executables.
+
+### Fixed
+- Fixed hardcoded values for `email` and `uuid` formats in `SchemaParser`; they are now more dynamic.
+
+## [1.0.0] - 2025-12-24
+
+### Added
+- **Vite & React Integration:**
+  - New `schemockVitePlugin` for seamless integration into Vite dev servers.
+  - Automatic proxy configuration and mock server lifecycle management within Vite.
+  - New `schemock init-vite` command to quickly set up Schemock in existing Vite projects.
+  - Comprehensive React + Vite example in `examples/react-vite`.
+- **Interactive Playground Improvements:**
+  - Added support for request bodies in POST, PUT, and PATCH requests.
+  - New "Copy to Clipboard" feature for response data and schemas.
+  - Improved UI with refined CSS and transition effects.
+- **Enhanced VS Code Extension:**
+  - Robust server lifecycle management (Start/Stop).
+  - New "Open Playground" command.
+  - Improved Status Bar integration with clear status indicators.
+  - Explorer context menu integration for one-click mock starting.
+- **Scoop Support:**
+  - Added `schemock.json` manifest for easy installation on Windows via Scoop.
+- **CLI Scaffolding Improvements:**
+  - `schemock init` now generates a comprehensive `README.md` for the new project.
+  - Improved "Next steps" feedback for all initialization commands.
+- **Fixed:**
+  - Proper escaping of template literals in generated playground HTML.
+  - Improved terminal icon and naming in VS Code extension.
+- **Interactive Playground:**
+  - New auto-generated HTML playground at the root URL (`/`).
+  - "Try it out" feature to send requests and view JSON responses directly in the browser.
+  - Tabbed interface to switch between "Try it out" and "Schema" view for each route.
+  - Request timing and status code display.
+- **One-Command Distribution:**
+  - `install.sh`: One-command installer for Linux and macOS.
+  - `install.ps1`: One-command installer for Windows (PowerShell).
+  - Updated `README.md` with quick installation instructions.
+- **VS Code Extension Scaffold:**
+  - New `vscode-extension` directory with a complete extension structure.
+  - Context menu integration for `.json` files to start Schemock.
+  - Status bar integration and server control commands.
+- **Preset Scenarios and Errors:**
+  - New `--scenario` flag in CLI `start` command to flip between API behaviors.
+  - Supported scenarios: `happy-path` (default), `slow` (delayed responses), `error-heavy` (frequent 4xx/5xx errors), and `sad-path` (both slow and error-heavy).
+  - Implementation of realistic delays (1-3s) for slow scenarios.
+  - Implementation of random failure modes for testing error handling in clients.
+- **Better JSON Schema Ergonomics:**
+  - New `validate` CLI command to validate schemas and show human-readable hints with line numbers.
+  - New `--strict` flag for both `start` and `validate` commands.
+  - Strict vs Loose mode for schema generation and validation.
+  - Request validation in `strict` mode for POST, PUT, and PATCH requests.
+  - Enhanced schema validation in `utils/validation.ts` with recursive property checks.
+- **Fixed:**
+  - False circular reference detection in `SchemaParser` when the same `$ref` is used multiple times in different branches of a schema.
+  - Incorrect wrapping of custom routes defined in `x-schemock-routes`.
+- **Richer Dynamic Behavior:**
+  - Support for parameterized routes (e.g., `/api/users/:id`)
+  - In-memory state management for CRUD operations (POST stores, GET lists/by ID, PUT updates, DELETE removes)
+  - Consistency in mock data generation: requesting the same ID returns the same object
+  - Smarter default route generation based on schema title
+  - Support for port 0 in ServerGenerator to allow random available ports in tests
+
 ### Added - Phase 2 Final (2025-12-23)
 - **Watch Mode Implementation:**
   - File watching with chokidar v3.5.3 for hot-reload capability

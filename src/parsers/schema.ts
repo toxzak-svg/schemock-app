@@ -7,8 +7,9 @@ export class SchemaParser {
    * @param schema - The schema to parse
    * @param rootSchema - Root schema for $ref resolution (defaults to schema)
    * @param visited - Set of visited references to prevent circular loops
+   * @param strict - Whether to enforce strict validation
    */
-  static parse(schema: Schema, rootSchema?: Schema, visited: Set<string> = new Set()): any {
+  static parse(schema: Schema, rootSchema?: Schema, visited: Set<string> = new Set(), strict: boolean = false, propertyName?: string): any {
     if (!schema) {
       throw new SchemaParseError('Schema is required');
     }
@@ -17,23 +18,23 @@ export class SchemaParser {
 
     // Handle references
     if (schema.$ref) {
-      return this.resolveRef(schema.$ref, root, visited);
+      return this.resolveRef(schema.$ref, root, visited, strict, propertyName);
     }
 
     // Handle oneOf/anyOf/allOf
     if (schema.oneOf && schema.oneOf.length > 0) {
       const randomIndex = Math.floor(Math.random() * schema.oneOf.length);
-      return this.parse(schema.oneOf[randomIndex], root, visited);
+      return this.parse(schema.oneOf[randomIndex], root, visited, strict, propertyName);
     }
 
     if (schema.anyOf && schema.anyOf.length > 0) {
       const randomIndex = Math.floor(Math.random() * schema.anyOf.length);
-      return this.parse(schema.anyOf[randomIndex], root, visited);
+      return this.parse(schema.anyOf[randomIndex], root, visited, strict, propertyName);
     }
 
     if (schema.allOf && schema.allOf.length > 0) {
       return schema.allOf.reduce((result, subSchema) => {
-        const parsed = this.parse(subSchema, root, visited);
+        const parsed = this.parse(subSchema, root, visited, strict, propertyName);
         return typeof parsed === 'object' && parsed !== null
           ? { ...result, ...parsed }
           : parsed;
@@ -43,24 +44,30 @@ export class SchemaParser {
     // Handle different schema types
     switch (schema.type) {
       case 'string':
-        return this.generateString(schema);
+        return this.generateString(schema, strict, propertyName);
       case 'number':
       case 'integer':
-        return this.generateNumber(schema);
+        return this.generateNumber(schema, strict, propertyName);
       case 'boolean':
         return this.generateBoolean();
       case 'array':
-        return this.generateArray(schema, root, visited);
+        return this.generateArray(schema, root, visited, strict);
       case 'object':
-        return this.generateObject(schema, root, visited);
+        return this.generateObject(schema, root, visited, strict);
       case 'null':
         return null;
       default:
         if (Array.isArray(schema.type)) {
           // If multiple types are allowed, pick one randomly
           const randomType = schema.type[Math.floor(Math.random() * schema.type.length)];
-          return this.parse({ ...schema, type: randomType }, root, visited);
+          return this.parse({ ...schema, type: randomType }, root, visited, strict, propertyName);
         }
+        
+        // Loose mode fallback for unknown type
+        if (!strict && schema.properties) {
+          return this.generateObject(schema, root, visited, strict);
+        }
+        
         return 'UNKNOWN_TYPE';
     }
   }
@@ -70,8 +77,10 @@ export class SchemaParser {
    * @param ref - The reference string (e.g., "#/definitions/User")
    * @param rootSchema - The root schema containing definitions
    * @param visited - Set of visited references to prevent circular loops
+   * @param strict - Whether to enforce strict validation
+   * @param propertyName - Optional property name for heuristics
    */
-  private static resolveRef(ref: string, rootSchema: Schema, visited: Set<string>): any {
+  private static resolveRef(ref: string, rootSchema: Schema, visited: Set<string>, strict: boolean = false, propertyName?: string): any {
     // Check for circular references
     if (visited.has(ref)) {
       console.warn(`Circular reference detected: ${ref}`);
@@ -104,27 +113,54 @@ export class SchemaParser {
     visited.add(ref);
 
     // Parse the resolved schema
-    return this.parse(resolved, rootSchema, visited);
+    const result = this.parse(resolved, rootSchema, visited, strict, propertyName);
+    
+    // Remove from visited so it can be used in other branches
+    visited.delete(ref);
+    
+    return result;
   }
 
-  private static generateString(schema: Schema): string {
+  private static generateString(schema: Schema, strict: boolean = false, propertyName?: string): string {
     if (schema.enum) {
       return schema.enum[Math.floor(Math.random() * schema.enum.length)];
+    }
+
+    // Heuristics based on property name
+    if (propertyName) {
+      const name = propertyName.toLowerCase();
+      if (name.includes('email')) return `user${Math.floor(Math.random() * 1000)}@example.com`;
+      if (name.includes('firstname')) return ['Alice', 'Bob', 'Charlie', 'Diana', 'Edward'][Math.floor(Math.random() * 5)];
+      if (name.includes('lastname')) return ['Smith', 'Jones', 'Williams', 'Brown', 'Taylor'][Math.floor(Math.random() * 5)];
+      if (name.includes('fullname') || name === 'name') return ['John Doe', 'Jane Smith', 'Michael Johnson', 'Emily Brown'][Math.floor(Math.random() * 4)];
+      if (name.includes('password')) return '********';
+      if (name.includes('phone')) return `+1-555-${Math.floor(100 + Math.random() * 900)}-${Math.floor(1000 + Math.random() * 9000)}`;
+      if (name.includes('city')) return ['New York', 'London', 'Paris', 'Tokyo', 'Berlin'][Math.floor(Math.random() * 5)];
+      if (name.includes('country')) return ['USA', 'UK', 'France', 'Japan', 'Germany'][Math.floor(Math.random() * 5)];
+      if (name.includes('company')) return ['Acme Corp', 'Globex', 'Soylent Corp', 'Initech'][Math.floor(Math.random() * 4)];
+      if (name.includes('title')) return ['Project Alpha', 'Awesome Feature', 'New Release', 'Bug Fix'][Math.floor(Math.random() * 4)];
+      if (name.includes('description') || name.includes('summary')) return 'A comprehensive description of the resource with all necessary details.';
+      if (name.includes('id') || name.includes('uuid')) return '123e4567-e89b-12d3-a456-426614174000';
     }
 
     if (schema.format) {
       switch (schema.format) {
         case 'date-time':
           return new Date().toISOString();
+        case 'date':
+          return new Date().toISOString().split('T')[0];
+        case 'time':
+          return new Date().toISOString().split('T')[1].split('.')[0];
         case 'email':
-          return 'test@example.com';
+          return `test${Math.floor(Math.random() * 1000)}@example.com`;
         case 'hostname':
           return 'example.com';
         case 'ipv4':
-          return '192.168.1.1';
+          return `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
         case 'ipv6':
           return '2001:0db8:85a3:0000:0000:8a2e:0370:7334';
         case 'uri':
+        case 'url':
           return 'https://example.com';
         case 'uuid':
           return '123e4567-e89b-12d3-a456-426614174000';
@@ -153,26 +189,42 @@ export class SchemaParser {
     return result;
   }
 
-  private static generateNumber(schema: Schema): number {
-    let min = typeof schema.minimum === 'number' ? schema.minimum : 0;
-    let max = typeof schema.maximum === 'number' ? schema.maximum : 100;
+  private static generateNumber(schema: Schema, strict: boolean = false, propertyName?: string): number {
+    // Heuristics based on property name
+    if (propertyName) {
+      const name = propertyName.toLowerCase();
+      if (name.includes('age')) return 18 + Math.floor(Math.random() * 60);
+      if (name.includes('price') || name.includes('amount')) return parseFloat((Math.random() * 100).toFixed(2));
+      if (name.includes('year')) return 1970 + Math.floor(Math.random() * 60);
+      if (name.includes('rating')) return parseFloat((Math.random() * 5).toFixed(1));
+    }
+
+    let min = typeof schema.minimum === 'number' ? schema.minimum : (strict ? 0 : -100);
+    let max = typeof schema.maximum === 'number' ? schema.maximum : (strict ? 100 : 1000);
     
+    // In strict mode, if multipleOf is present, ensures values are strictly compliant
+    if (strict && schema.multipleOf && min % schema.multipleOf !== 0) {
+      min = Math.ceil(min / schema.multipleOf) * schema.multipleOf;
+    }
+
     // Handle exclusive minimum/maximum
     if (schema.exclusiveMinimum !== undefined) {
       if (typeof schema.exclusiveMinimum === 'boolean' && schema.exclusiveMinimum) {
-        min += 1;
+        min += (schema.multipleOf || 1);
       } else if (typeof schema.exclusiveMinimum === 'number') {
-        min = schema.exclusiveMinimum + 1;
+        min = schema.exclusiveMinimum + (schema.multipleOf || 0.01);
       }
     }
     
     if (schema.exclusiveMaximum !== undefined) {
       if (typeof schema.exclusiveMaximum === 'boolean' && schema.exclusiveMaximum) {
-        max -= 1;
+        max -= (schema.multipleOf || 1);
       } else if (typeof schema.exclusiveMaximum === 'number') {
-        max = schema.exclusiveMaximum - 1;
+        max = schema.exclusiveMaximum - (schema.multipleOf || 0.01);
       }
     }
+
+    if (max < min) max = min + (schema.multipleOf || 1);
     
     // Handle multipleOf if specified
     if (schema.multipleOf) {
@@ -188,9 +240,9 @@ export class SchemaParser {
     return Math.random() > 0.5;
   }
 
-  private static generateArray(schema: Schema, rootSchema?: Schema, visited: Set<string> = new Set()): any[] {
-    const minItems = schema.minItems || 1;
-    const maxItems = schema.maxItems || Math.max(5, minItems);
+  private static generateArray(schema: Schema, rootSchema?: Schema, visited: Set<string> = new Set(), strict: boolean = false): any[] {
+    const minItems = schema.minItems || (strict ? 1 : 0);
+    const maxItems = schema.maxItems || Math.max(minItems + (strict ? 2 : 5), 10);
     const count = minItems + Math.floor(Math.random() * (maxItems - minItems + 1));
     
     if (!schema.items) {
@@ -203,19 +255,19 @@ export class SchemaParser {
     if (Array.isArray(schema.items)) {
       // Tuple type
       for (let i = 0; i < Math.min(count, schema.items.length); i++) {
-        result.push(this.parse(schema.items[i], root, visited));
+        result.push(this.parse(schema.items[i], root, visited, strict));
       }
     } else {
       // Array of items with the same schema
       for (let i = 0; i < count; i++) {
-        result.push(this.parse(schema.items, root, visited));
+        result.push(this.parse(schema.items, root, visited, strict));
       }
     }
     
     return result;
   }
 
-  private static generateObject(schema: Schema, rootSchema?: Schema, visited: Set<string> = new Set()): Record<string, any> {
+  private static generateObject(schema: Schema, rootSchema?: Schema, visited: Set<string> = new Set(), strict: boolean = false): Record<string, any> {
     if (!schema.properties) {
       return {};
     }
@@ -226,9 +278,12 @@ export class SchemaParser {
     
     // Process all properties
     for (const [key, propSchema] of Object.entries(schema.properties)) {
-      // Only include required properties and those with a 50% chance for optional ones
-      if (required.has(key) || Math.random() > 0.5) {
-        result[key] = this.parse(propSchema as Schema, root, visited);
+      // In strict mode, always include required properties
+      // In loose mode, or for non-required, have a high chance to include (90%)
+      const isRequired = required.has(key);
+      
+      if (isRequired || !strict || Math.random() > 0.1) {
+        result[key] = this.parse(propSchema as Schema, root, visited, strict, key);
       }
     }
     
@@ -243,7 +298,7 @@ export class SchemaParser {
         if (!(propName in result)) {
           result[propName] = typeof schema.additionalProperties === 'boolean'
             ? 'additional_value'
-            : this.parse(schema.additionalProperties, root, visited);
+            : this.parse(schema.additionalProperties, root, visited, strict);
         }
       }
     }

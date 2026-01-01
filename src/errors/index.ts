@@ -6,7 +6,8 @@ export class SchemockError extends Error {
   constructor(
     message: string,
     public code: string,
-    public details?: any
+    public details?: any,
+    public hint?: string
   ) {
     super(message);
     this.name = 'SchemockError';
@@ -18,8 +19,8 @@ export class SchemockError extends Error {
  * Configuration-related errors (E001-E099)
  */
 export class ConfigurationError extends SchemockError {
-  constructor(message: string, details?: any) {
-    super(message, 'E001', details);
+  constructor(message: string, details?: any, hint?: string) {
+    super(message, 'E001', details, hint || 'Check your CLI arguments or configuration file.');
     this.name = 'ConfigurationError';
   }
 }
@@ -28,8 +29,8 @@ export class ConfigurationError extends SchemockError {
  * Schema parsing errors (E100-E199)
  */
 export class SchemaParseError extends SchemockError {
-  constructor(message: string, details?: any) {
-    super(message, 'E100', details);
+  constructor(message: string, details?: any, hint?: string) {
+    super(message, 'E100', details, hint || 'Ensure your schema follows JSON Schema Draft 7 specifications.');
     this.name = 'SchemaParseError';
   }
 }
@@ -38,8 +39,8 @@ export class SchemaParseError extends SchemockError {
  * Schema reference resolution errors (E101)
  */
 export class SchemaRefError extends SchemockError {
-  constructor(message: string, ref: string) {
-    super(message, 'E101', { ref });
+  constructor(message: string, ref: string, hint?: string) {
+    super(message, 'E101', { ref }, hint || 'Verify that the referenced definition exists in your schema.');
     this.name = 'SchemaRefError';
   }
 }
@@ -48,8 +49,8 @@ export class SchemaRefError extends SchemockError {
  * Server errors (E200-E299)
  */
 export class ServerError extends SchemockError {
-  constructor(message: string, details?: any) {
-    super(message, 'E200', details);
+  constructor(message: string, details?: any, hint?: string) {
+    super(message, 'E200', details, hint || 'Check if another process is using the same port or if you have necessary permissions.');
     this.name = 'ServerError';
   }
 }
@@ -58,8 +59,8 @@ export class ServerError extends SchemockError {
  * Port-related errors (E201)
  */
 export class PortError extends SchemockError {
-  constructor(message: string, port: number) {
-    super(message, 'E201', { port });
+  constructor(message: string, port: number, hint?: string) {
+    super(message, 'E201', { port }, hint || `Port ${port} is already in use. Try starting with a different port using --port <number>.`);
     this.name = 'PortError';
   }
 }
@@ -68,8 +69,8 @@ export class PortError extends SchemockError {
  * File I/O errors (E300-E399)
  */
 export class FileError extends SchemockError {
-  constructor(message: string, filePath: string, operation?: string) {
-    super(message, 'E300', { filePath, operation });
+  constructor(message: string, filePath: string, operation?: string, hint?: string) {
+    super(message, 'E300', { filePath, operation }, hint || `Make sure the file at ${filePath} exists and is readable.`);
     this.name = 'FileError';
   }
 }
@@ -78,8 +79,8 @@ export class FileError extends SchemockError {
  * Validation errors (E400-E499)
  */
 export class ValidationError extends SchemockError {
-  constructor(message: string, field: string, value?: any) {
-    super(message, 'E400', { field, value });
+  constructor(message: string, field: string, value?: any, hint?: string) {
+    super(message, 'E400', { field, value }, hint || `The provided value for '${field}' does not match the schema requirements.`);
     this.name = 'ValidationError';
   }
 }
@@ -91,27 +92,19 @@ export function formatError(error: Error): string {
   if (error instanceof SchemockError) {
     let message = `[${error.code}] ${error.message}`;
     
-    if (error.details) {
+    if (error.hint) {
+      message += `\n\n💡 Hint: ${error.hint}`;
+    }
+
+    if (error.details && Object.keys(error.details).length > 0) {
       message += `\n\nDetails:\n${JSON.stringify(error.details, null, 2)}`;
     }
     
-    // Add helpful suggestions based on error type
-    if (error instanceof PortError) {
-      message += `\n\nSuggestions:
-- Try a different port: schemock start --port 3001
-- Check if another process is using port ${error.details.port}
+    // Legacy suggestions (kept for backward compatibility or more specific advice)
+    if (error instanceof PortError && error.details.port) {
+      message += `\n\nAdditional Suggestions:
 - On Windows: netstat -ano | findstr :${error.details.port}
 - On macOS/Linux: lsof -i :${error.details.port}`;
-    } else if (error instanceof FileError) {
-      message += `\n\nSuggestions:
-- Check if the file exists: ${error.details.filePath}
-- Verify file permissions
-- Ensure the path is correct`;
-    } else if (error instanceof SchemaRefError) {
-      message += `\n\nSuggestions:
-- Check if the reference path is correct: ${error.details.ref}
-- Ensure the referenced definition exists in the schema
-- Verify the $ref format (e.g., "#/definitions/User")`;
     }
     
     return message;

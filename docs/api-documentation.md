@@ -348,6 +348,7 @@ interface ServerOptions {
   watch?: boolean;                 // Watch for file changes (future)
   cors?: boolean;                  // Enable/disable CORS
   logLevel?: 'error' | 'warn' | 'info' | 'debug';
+  scenario?: 'happy-path' | 'slow' | 'error-heavy' | 'sad-path';
 }
 ```
 
