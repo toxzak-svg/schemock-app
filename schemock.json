@@ -1,0 +1,15 @@
+{
+    "version": "1.0.0",
+    "description": "Turn JSON schemas into live mock REST APIs in seconds",
+    "homepage": "https://github.com/toxzak-svg/schemock-app",
+    "license": "MIT",
+    "url": "https://github.com/toxzak-svg/schemock-app/releases/download/v1.0.0/schemock-win-x64.exe",
+    "hash": "8485c29015930e447953c306d1964268953568c83526a8d67f407559e7e72506",
+    "bin": [
+        [ "schemock-win-x64.exe", "schemock" ]
+    ],
+    "checkver": "github",
+    "autoupdate": {
+        "url": "https://github.com/toxzak-svg/schemock-app/releases/download/v$version/schemock-win-x64.exe"
+    }
+}

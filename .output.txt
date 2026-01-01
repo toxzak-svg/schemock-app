@@ -1,0 +1,548 @@
+
+> schemock@1.0.0 test
+> jest --coverage
+ PASS  __tests__/watcher.test.ts (7.264 s)
+  ● Console
+    console.log
+      [2026-01-01T06:50:25.000Z] INFO  Started watching file | filePath="/test/schema.json"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:25.083Z] INFO  Started watching file | filePath="/test/schema.json"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:25.085Z] INFO  Started watching file | filePath="/test/schema1.json"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:25.086Z] INFO  Started watching file | filePath="/test/schema2.json"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:25.088Z] INFO  Started watching file | filePath="/test/schema.json"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:25.091Z] INFO  Started watching file | filePath="/test/schema.json"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:25.094Z] INFO  Started watching file | filePath="/test/schema.json"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:25.097Z] INFO  Started watching file | filePath="/test/schema.json"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:25.106Z] INFO  Started watching file | filePath="/test/schema.json"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+ PASS  __tests__/errors.test.ts (7.488 s)
+ PASS  __tests__/cli.test.ts (8 s)
+ PASS  __tests__/validation.test.ts (8.231 s)
+ PASS  __tests__/security.test.ts (8.76 s)
+ PASS  __tests__/schema-parser.test.ts (9.154 s)
+ PASS  __tests__/schema-parser-enhanced.test.ts (9.941 s)
+  ● Console
+    console.warn
+      Circular reference detected: #/definitions/Person
+      84 |     // Check for circular references
+      85 |     if (visited.has(ref)) {
+    > 86 |       console.warn(`Circular reference detected: ${ref}`);
+         |               ^
+      87 |       return null;
+      88 |     }
+      89 |
+      at SchemaParser.warn [as resolveRef] (src/parsers/schema.ts:86:15)
+      at SchemaParser.resolveRef [as parse] (src/parsers/schema.ts:21:19)
+      at SchemaParser.parse [as generateObject] (src/parsers/schema.ts:286:28)
+      at SchemaParser.generateObject [as parse] (src/parsers/schema.ts:56:21)
+      at SchemaParser.parse [as resolveRef] (src/parsers/schema.ts:116:25)
+      at SchemaParser.resolveRef [as parse] (src/parsers/schema.ts:21:19)
+      at SchemaParser.parse [as generateObject] (src/parsers/schema.ts:286:28)
+      at SchemaParser.generateObject [as parse] (src/parsers/schema.ts:56:21)
+      at Object.<anonymous> (__tests__/schema-parser-enhanced.test.ts:87:35)
+    console.warn
+      External references not supported yet: external-schema.json#/User
+      90 |     // Only handle internal references for now (starting with #/)
+      91 |     if (!ref.startsWith('#/')) {
+    > 92 |       console.warn(`External references not supported yet: ${ref}`);
+         |               ^
+      93 |       return 'EXTERNAL_REF_NOT_SUPPORTED';
+      94 |     }
+      95 |
+      at SchemaParser.warn [as resolveRef] (src/parsers/schema.ts:92:15)
+      at SchemaParser.resolveRef [as parse] (src/parsers/schema.ts:21:19)
+      at SchemaParser.parse [as generateObject] (src/parsers/schema.ts:286:28)
+      at SchemaParser.generateObject [as parse] (src/parsers/schema.ts:56:21)
+      at Object.<anonymous> (__tests__/schema-parser-enhanced.test.ts:117:35)
+ PASS  __tests__/heuristics.test.ts (9.99 s)
+ PASS  __tests__/server-generator.test.ts (10.87 s)
+  ● Console
+    console.log
+      [2026-01-01T06:50:28.611Z] INFO  GET /api/data - 200 (4ms) | type="http-request"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+ PASS  __tests__/richer-behavior.test.ts (10.85 s)
+  ● Console
+    console.log
+      [2026-01-01T06:50:28.546Z] INFO  Mock server started | port=0 url="http://localhost:0"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:28.576Z] INFO  Mock server started | port=0 url="http://localhost:0"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:28.641Z] INFO  GET /api/users/1 - 200 (6ms) | type="http-request"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:28.659Z] INFO  GET /api/users/2 - 200 (1ms) | type="http-request"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:28.665Z] INFO  GET /api/users/1 - 200 | type="http-request"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:28.670Z] INFO  Server stopped
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:28.676Z] INFO  Mock server started | port=0 url="http://localhost:0"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:28.682Z] INFO  GET /api/items - 200 (1ms) | type="http-request"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:28.706Z] INFO  POST /api/items - 201 | type="http-request"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:28.710Z] INFO  GET /api/items - 200 | type="http-request"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:28.714Z] INFO  GET /api/items/item-1 - 200 | type="http-request"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:28.717Z] INFO  Server stopped
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:28.718Z] INFO  Server stopped
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+ PASS  __tests__/dsl.test.ts (10.948 s)
+  ● Console
+    console.log
+      [2026-01-01T06:50:28.664Z] INFO  Mock server started | port=3005 url="http://localhost:3005"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:28.719Z] INFO  GET /api/users - 200 (4ms) | type="http-request"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:28.736Z] INFO  GET /api/users/123 - 200 | type="http-request"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:28.741Z] INFO  GET /api/status - 200 | type="http-request"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:28.747Z] INFO  Server stopped
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:28.752Z] INFO  Mock server started | port=3006 url="http://localhost:3006"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:28.760Z] INFO  POST /api/created - 201 (1ms) | type="http-request"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:28.874Z] INFO  GET /api/slow - 200 (111ms) | type="http-request"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:28.877Z] INFO  Server stopped
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+ PASS  __tests__/new-features.test.ts (11.174 s)
+  ● Console
+    console.log
+      [2026-01-01T06:50:28.985Z] INFO  POST /api/users - 201 (2ms) | type="http-request"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.warn
+      [2026-01-01T06:50:29.007Z] WARN  Request validation failed (strict mode) | path="/api/users" method="post" error="Missing required field: name"
+      106 |     if (this.shouldLog('warn')) {
+      107 |       const formatted = this.formatMessage('warn', message, context);
+    > 108 |       console.warn(this.colorize('warn', formatted));
+          |               ^
+      109 |     }
+      110 |   }
+      111 |
+      at Logger.warn (src/utils/logger.ts:108:15)
+      at Object.warn (src/utils/logger.ts:176:59)
+      at warn (src/generators/server.ts:171:21)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at next (node_modules/express/lib/router/route.js:149:13)
+      at Route.dispatch (node_modules/express/lib/router/route.js:119:3)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at node_modules/express/lib/router/index.js:284:15
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:91:12)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at next (src/generators/server.ts:64:7)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at node_modules/body-parser/lib/read.js:137:5
+      at invokeCallback (node_modules/raw-body/index.js:238:16)
+      at done (node_modules/raw-body/index.js:227:7)
+      at IncomingMessage.onEnd (node_modules/raw-body/index.js:287:7)
+    console.warn
+      [2026-01-01T06:50:29.009Z] WARN  POST /api/users - 400 (3ms) | type="http-request"
+      106 |     if (this.shouldLog('warn')) {
+      107 |       const formatted = this.formatMessage('warn', message, context);
+    > 108 |       console.warn(this.colorize('warn', formatted));
+          |               ^
+      109 |     }
+      110 |   }
+      111 |
+      at Logger.warn (src/utils/logger.ts:108:15)
+      at Logger.warn [as logRequest] (src/utils/logger.ts:141:12)
+      at Object.logRequest [as request] (src/utils/logger.ts:180:12)
+      at ServerResponse.request [as json] (src/generators/server.ts:60:13)
+      at json (src/generators/server.ts:177:40)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at next (node_modules/express/lib/router/route.js:149:13)
+      at Route.dispatch (node_modules/express/lib/router/route.js:119:3)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at node_modules/express/lib/router/index.js:284:15
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:91:12)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at next (src/generators/server.ts:64:7)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at node_modules/body-parser/lib/read.js:137:5
+      at invokeCallback (node_modules/raw-body/index.js:238:16)
+      at done (node_modules/raw-body/index.js:227:7)
+      at IncomingMessage.onEnd (node_modules/raw-body/index.js:287:7)
+ PASS  __tests__/performance.test.ts (12.318 s)
+  ● Console
+    console.log
+
+      === 100 Sequential Requests ===
+      at Object.<anonymous> (__tests__/performance.test.ts:139:15)
+    console.log
+      Requests/sec: 518.13
+      at Object.<anonymous> (__tests__/performance.test.ts:140:15)
+    console.log
+      Avg Latency: 1.92ms
+      at Object.<anonymous> (__tests__/performance.test.ts:141:15)
+    console.log
+      P95 Latency: 3ms
+      at Object.<anonymous> (__tests__/performance.test.ts:142:15)
+    console.log
+      Success Rate: 100.00%
+      at Object.<anonymous> (__tests__/performance.test.ts:143:15)
+    console.log
+
+      === 100 Concurrent Requests (10 at a time) ===
+      at Object.<anonymous> (__tests__/performance.test.ts:152:15)
+    console.log
+      Requests/sec: 952.38
+      at Object.<anonymous> (__tests__/performance.test.ts:153:15)
+    console.log
+      Avg Latency: 8.26ms
+      at Object.<anonymous> (__tests__/performance.test.ts:154:15)
+    console.log
+      P95 Latency: 16ms
+      at Object.<anonymous> (__tests__/performance.test.ts:155:15)
+    console.log
+      Success Rate: 100.00%
+      at Object.<anonymous> (__tests__/performance.test.ts:156:15)
+    console.log
+
+      === 500 Concurrent Requests (50 at a time) ===
+      at Object.<anonymous> (__tests__/performance.test.ts:165:15)
+    console.log
+      Requests/sec: 1524.39
+      at Object.<anonymous> (__tests__/performance.test.ts:166:15)
+    console.log
+      Avg Latency: 24.89ms
+      at Object.<anonymous> (__tests__/performance.test.ts:167:15)
+    console.log
+      P95 Latency: 58ms
+      at Object.<anonymous> (__tests__/performance.test.ts:168:15)
+    console.log
+      Success Rate: 100.00%
+      at Object.<anonymous> (__tests__/performance.test.ts:169:15)
+    console.log
+
+      === Latency Test (200 requests, 20 concurrent) ===
+      at Object.<anonymous> (__tests__/performance.test.ts:181:15)
+    console.log
+      Min Latency: 5ms
+      at Object.<anonymous> (__tests__/performance.test.ts:182:15)
+    console.log
+      P50 Latency: 6ms
+      at Object.<anonymous> (__tests__/performance.test.ts:183:15)
+    console.log
+      P95 Latency: 14ms
+      at Object.<anonymous> (__tests__/performance.test.ts:184:15)
+    console.log
+      P99 Latency: 15ms
+      at Object.<anonymous> (__tests__/performance.test.ts:185:15)
+    console.log
+      Max Latency: 15ms
+      at Object.<anonymous> (__tests__/performance.test.ts:186:15)
+    console.log
+
+      === Memory Test (1000 requests) ===
+      at Object.<anonymous> (__tests__/performance.test.ts:198:15)
+    console.log
+      Start Memory: 271.23 MB
+      at Object.<anonymous> (__tests__/performance.test.ts:199:15)
+    console.log
+      End Memory: 309.58 MB
+      at Object.<anonymous> (__tests__/performance.test.ts:200:15)
+    console.log
+      Memory Increase: 38.35 MB
+      at Object.<anonymous> (__tests__/performance.test.ts:201:15)
+    console.log
+
+      === Reliability Test (250 requests, 25 concurrent) ===
+      at Object.<anonymous> (__tests__/performance.test.ts:212:15)
+    console.log
+      Successful: 250
+      at Object.<anonymous> (__tests__/performance.test.ts:213:15)
+    console.log
+      Failed: 0
+      at Object.<anonymous> (__tests__/performance.test.ts:214:15)
+    console.log
+      Success Rate: 100.00%
+      at Object.<anonymous> (__tests__/performance.test.ts:215:15)
+    console.log
+
+      === POST Request Performance ===
+      at Object.<anonymous> (__tests__/performance.test.ts:237:15)
+    console.log
+      Average Latency: 1.36ms
+      at Object.<anonymous> (__tests__/performance.test.ts:238:15)
+ PASS  __tests__/scenarios.test.ts (19.88 s)
+  ● Console
+    console.log
+      [2026-01-01T06:50:28.754Z] INFO  Mock server started | port=0 url="http://localhost:0"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:28.804Z] INFO  GET /api/tests - 200 (2ms) | type="http-request"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:28.814Z] INFO  Server stopped
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:28.817Z] INFO  Mock server started | port=0 url="http://localhost:0"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:31.628Z] INFO  GET /api/tests - 200 (2807ms) | type="http-request"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:31.630Z] INFO  Server stopped
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:31.632Z] INFO  Mock server started | port=0 url="http://localhost:0"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:31.634Z] INFO  GET /api/tests - 200 | type="http-request"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:31.635Z] INFO  GET /api/tests - 200 | type="http-request"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:31.636Z] INFO  GET /api/tests - 200 | type="http-request"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.warn
+      [2026-01-01T06:50:31.638Z] WARN  Scenario error-heavy triggered error | path="/api/tests" method="get" statusCode=403
+      106 |     if (this.shouldLog('warn')) {
+      107 |       const formatted = this.formatMessage('warn', message, context);
+    > 108 |       console.warn(this.colorize('warn', formatted));
+          |               ^
+      109 |     }
+      110 |   }
+      111 |
+      at Logger.warn (src/utils/logger.ts:108:15)
+      at Object.warn (src/utils/logger.ts:176:59)
+      at warn (src/generators/server.ts:143:17)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at next (node_modules/express/lib/router/route.js:149:13)
+      at Route.dispatch (node_modules/express/lib/router/route.js:119:3)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at node_modules/express/lib/router/index.js:284:15
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:91:12)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at next (src/generators/server.ts:64:7)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at jsonParser (node_modules/body-parser/lib/types/json.js:113:7)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at cors (node_modules/cors/lib/index.js:188:7)
+      at node_modules/cors/lib/index.js:224:17
+      at originCallback (node_modules/cors/lib/index.js:214:15)
+      at node_modules/cors/lib/index.js:219:13
+      at optionsCallback (node_modules/cors/lib/index.js:199:9)
+      at corsMiddleware (node_modules/cors/lib/index.js:204:7)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at expressInit (node_modules/express/lib/middleware/init.js:40:5)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at query (node_modules/express/lib/middleware/query.js:45:5)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at router.handle (node_modules/express/lib/router/index.js:175:3)
+      at app.handle (node_modules/express/lib/application.js:181:10)
+      at Server.app (node_modules/express/lib/express.js:39:9)
+    console.warn
+      [2026-01-01T06:50:31.640Z] WARN  GET /api/tests - 403 (2ms) | type="http-request"
+      106 |     if (this.shouldLog('warn')) {
+      107 |       const formatted = this.formatMessage('warn', message, context);
+    > 108 |       console.warn(this.colorize('warn', formatted));
+          |               ^
+      109 |     }
+      110 |   }
+      111 |
+      at Logger.warn (src/utils/logger.ts:108:15)
+      at Logger.warn [as logRequest] (src/utils/logger.ts:141:12)
+      at Object.logRequest [as request] (src/utils/logger.ts:180:12)
+      at ServerResponse.request [as json] (src/generators/server.ts:60:13)
+      at json (src/generators/server.ts:149:44)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at next (node_modules/express/lib/router/route.js:149:13)
+      at Route.dispatch (node_modules/express/lib/router/route.js:119:3)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at node_modules/express/lib/router/index.js:284:15
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:91:12)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at next (src/generators/server.ts:64:7)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at jsonParser (node_modules/body-parser/lib/types/json.js:113:7)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at cors (node_modules/cors/lib/index.js:188:7)
+      at node_modules/cors/lib/index.js:224:17
+      at originCallback (node_modules/cors/lib/index.js:214:15)
+      at node_modules/cors/lib/index.js:219:13
+      at optionsCallback (node_modules/cors/lib/index.js:199:9)
+      at corsMiddleware (node_modules/cors/lib/index.js:204:7)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at expressInit (node_modules/express/lib/middleware/init.js:40:5)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at query (node_modules/express/lib/middleware/query.js:45:5)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at router.handle (node_modules/express/lib/router/index.js:175:3)
+      at app.handle (node_modules/express/lib/application.js:181:10)
+      at Server.app (node_modules/express/lib/express.js:39:9)
+    console.log
+      [2026-01-01T06:50:31.642Z] INFO  Server stopped
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:31.643Z] INFO  Mock server started | port=0 url="http://localhost:0"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:33.470Z] INFO  GET /api/tests - 200 (1824ms) | type="http-request"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.log
+      [2026-01-01T06:50:36.201Z] INFO  GET /api/tests - 200 (2729ms) | type="http-request"
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+    console.warn
+      [2026-01-01T06:50:37.752Z] WARN  Scenario sad-path triggered error | path="/api/tests" method="get" statusCode=500
+      106 |     if (this.shouldLog('warn')) {
+      107 |       const formatted = this.formatMessage('warn', message, context);
+    > 108 |       console.warn(this.colorize('warn', formatted));
+          |               ^
+      109 |     }
+      110 |   }
+      111 |
+      at Logger.warn (src/utils/logger.ts:108:15)
+      at Object.warn (src/utils/logger.ts:176:59)
+      at warn (src/generators/server.ts:143:17)
+    console.warn
+      [2026-01-01T06:50:37.752Z] WARN  GET /api/tests - 500 (1548ms) | type="http-request"
+      106 |     if (this.shouldLog('warn')) {
+      107 |       const formatted = this.formatMessage('warn', message, context);
+    > 108 |       console.warn(this.colorize('warn', formatted));
+          |               ^
+      109 |     }
+      110 |   }
+      111 |
+      at Logger.warn (src/utils/logger.ts:108:15)
+      at Logger.warn [as logRequest] (src/utils/logger.ts:141:12)
+      at Object.logRequest [as request] (src/utils/logger.ts:180:12)
+      at ServerResponse.request [as json] (src/generators/server.ts:60:13)
+      at json (src/generators/server.ts:149:44)
+    console.log
+      [2026-01-01T06:50:37.754Z] INFO  Server stopped
+      at Logger.log [as info] (src/utils/logger.ts:118:15)
+-|---------|----------|---------|---------|-------------------
+ | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
+-|---------|----------|---------|---------|-------------------
+ |    74.2 |    68.37 |   72.11 |   75.45 |
+  |      55 |        0 |   33.33 |      55 |
+   |      55 |        0 |   33.33 |      55 | 17-51
+  |     100 |      100 |     100 |     100 |
+   |     100 |      100 |     100 |     100 |
+  |   67.11 |     64.7 |    64.1 |   68.05 |
+   |   10.52 |        0 |       0 |   11.11 | 5-74
+   |   72.33 |    68.75 |   69.44 |   73.23 | ...19,448-472,529
+  |   18.51 |        0 |       0 |   18.51 |
+   |   18.51 |        0 |       0 |   18.51 | 47-99
+  |   80.74 |    65.35 |     100 |   85.71 |
+   |   80.74 |    65.35 |     100 |   85.71 | ...49,272,292-299
+  |   80.63 |    76.71 |   76.19 |   80.73 |
+   |   70.37 |     62.5 |   69.56 |   69.23 | ...62,175,182-184
+   |   85.95 |    82.56 |     100 |   86.66 | ...43,253,267,338
+   |   78.72 |    53.84 |   72.72 |   78.26 | ...5-48,63-76,144
+-|---------|----------|---------|---------|-------------------
+Test Suites: 14 passed, 14 total
+Tests:       204 passed, 204 total
+Snapshots:   0 total
+Time:        21.381 s
+Ran all test suites.

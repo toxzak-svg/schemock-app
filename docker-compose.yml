@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  schemock:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./examples:/schemas
+    command: ["start", "/schemas/simple-user.json", "--watch"]
+
+  frontend:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./examples/frontend-demo:/usr/share/nginx/html
+    depends_on:
+      - schemock
