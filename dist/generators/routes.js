@@ -240,3 +240,4 @@ function generateCRUDDSL(resourceName) {
         }
     ];
 }
+//# sourceMappingURL=routes.js.map

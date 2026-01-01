@@ -551,3 +551,4 @@ ${chalk_1.default.yellow('For detailed help:')}
     process.exit(0);
 }
 program.parse(process.argv);
+//# sourceMappingURL=index.js.map

@@ -281,3 +281,4 @@ class SchemaParser {
     }
 }
 exports.SchemaParser = SchemaParser;
+//# sourceMappingURL=schema.js.map

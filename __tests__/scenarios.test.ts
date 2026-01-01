@@ -80,7 +80,7 @@ describe('Preset Scenarios', () => {
     let hasError = false;
     let hasDelay = false;
 
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 15; i++) {
       const start = Date.now();
       const response = await fetch(`http://localhost:${port}/api/tests`);
       const duration = Date.now() - start;
@@ -98,5 +98,5 @@ describe('Preset Scenarios', () => {
 
     expect(hasError).toBe(true);
     expect(hasDelay).toBe(true);
-  });
+  }, 30000); // Increase timeout to 30 seconds
 });

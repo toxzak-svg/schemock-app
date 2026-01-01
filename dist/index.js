@@ -69,3 +69,4 @@ __exportStar(require("./errors"), exports);
 __exportStar(require("./utils/validation"), exports);
 __exportStar(require("./utils/watcher"), exports);
 __exportStar(require("./integrations/vite"), exports);
+//# sourceMappingURL=index.js.map

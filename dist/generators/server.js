@@ -609,3 +609,4 @@ exports.ServerGenerator = ServerGenerator;
 function createMockServer(config) {
     return new ServerGenerator(config);
 }
+//# sourceMappingURL=server.js.map

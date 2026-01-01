@@ -74,7 +74,9 @@ describe('Multi-endpoint DSL', () => {
     const statusResponse = await fetch(`http://localhost:${TEST_PORT}/api/status`);
     const statusData = await statusResponse.json() as any;
     expect(statusResponse.status).toBe(200);
-    expect(statusData).toEqual({ status: 'ok', version: '1.0.0' });
+    expect(statusData).toHaveProperty('status', 'ok');
+    expect(statusData).toHaveProperty('version', '1.0.0');
+    // Note: May include _meta metadata
   });
 
   it('should support custom status codes and delays', async () => {

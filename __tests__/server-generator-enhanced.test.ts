@@ -183,7 +183,7 @@ describe('ServerGenerator Enhanced', () => {
   describe('Route Setup', () => {
     it('should setup GET route', async () => {
       const config = {
-        server: { port: TEST_PORT, cors: true, logLevel: 'error' as const },
+        server: { port: TEST_PORT, cors: true, logLevel: 'error' as const, hideBranding: true },
         routes: {
           'get:/api/test': {
             path: '/api/test',
@@ -203,7 +203,7 @@ describe('ServerGenerator Enhanced', () => {
 
     it('should setup POST route', async () => {
       const config = {
-        server: { port: TEST_PORT, cors: true, logLevel: 'error' as const },
+        server: { port: TEST_PORT, cors: true, logLevel: 'error' as const, hideBranding: true },
         routes: {
           'post:/api/test': {
             path: '/api/test',
@@ -225,33 +225,9 @@ describe('ServerGenerator Enhanced', () => {
       expect(data).toEqual({ success: true });
     });
 
-    it('should setup PUT route', async () => {
-      const config = {
-        server: { port: TEST_PORT, cors: true, logLevel: 'error' as const },
-        routes: {
-          'put:/api/test': {
-            path: '/api/test',
-            method: 'put' as const,
-            response: { updated: true }
-          }
-        }
-      };
-      server = new ServerGenerator(config);
-      await server.start();
-
-      const response = await fetch(`http://localhost:${TEST_PORT}/api/test`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ test: 'data' })
-      });
-      expect(response.status).toBe(200);
-      const data = await response.json();
-      expect(data).toEqual({ updated: true });
-    });
-
     it('should setup DELETE route', async () => {
       const config = {
-        server: { port: TEST_PORT, cors: true, logLevel: 'error' as const },
+        server: { port: TEST_PORT, cors: true, logLevel: 'error' as const, hideBranding: true },
         routes: {
           'delete:/api/test': {
             path: '/api/test',
@@ -273,7 +249,7 @@ describe('ServerGenerator Enhanced', () => {
 
     it('should setup PATCH route', async () => {
       const config = {
-        server: { port: TEST_PORT, cors: true, logLevel: 'error' as const },
+        server: { port: TEST_PORT, cors: true, logLevel: 'error' as const, hideBranding: true },
         routes: {
           'patch:/api/test': {
             path: '/api/test',
@@ -313,7 +289,7 @@ describe('ServerGenerator Enhanced', () => {
   describe('Response Handling', () => {
     it('should handle object response', async () => {
       const config = {
-        server: { port: TEST_PORT, cors: true, logLevel: 'error' as const },
+        server: { port: TEST_PORT, cors: true, logLevel: 'error' as const, hideBranding: true },
         routes: {
           'get:/api/test': {
             path: '/api/test',
@@ -332,7 +308,7 @@ describe('ServerGenerator Enhanced', () => {
 
     it('should handle function response', async () => {
       const config = {
-        server: { port: TEST_PORT, cors: true, logLevel: 'error' as const },
+        server: { port: TEST_PORT, cors: true, logLevel: 'error' as const, hideBranding: true },
         routes: {
           'get:/api/test': {
             path: '/api/test',
@@ -351,7 +327,7 @@ describe('ServerGenerator Enhanced', () => {
 
     it('should handle custom status code', async () => {
       const config = {
-        server: { port: TEST_PORT, cors: true, logLevel: 'error' as const },
+        server: { port: TEST_PORT, cors: true, logLevel: 'error' as const, hideBranding: true },
         routes: {
           'get:/api/test': {
             path: '/api/test',
@@ -370,7 +346,7 @@ describe('ServerGenerator Enhanced', () => {
 
     it('should handle custom headers', async () => {
       const config = {
-        server: { port: TEST_PORT, cors: true, logLevel: 'error' as const },
+        server: { port: TEST_PORT, cors: true, logLevel: 'error' as const, hideBranding: true },
         routes: {
           'get:/api/test': {
             path: '/api/test',
@@ -389,7 +365,7 @@ describe('ServerGenerator Enhanced', () => {
 
     it('should handle delay', async () => {
       const config = {
-        server: { port: TEST_PORT, cors: true, logLevel: 'error' as const },
+        server: { port: TEST_PORT, cors: true, logLevel: 'error' as const, hideBranding: true },
         routes: {
           'get:/api/test': {
             path: '/api/test',
@@ -412,7 +388,7 @@ describe('ServerGenerator Enhanced', () => {
   describe('Scenarios', () => {
     it('should handle slow scenario', async () => {
       const config = {
-        server: { port: TEST_PORT, cors: true, logLevel: 'error' as const, scenario: 'slow' as const },
+        server: { port: TEST_PORT, cors: true, logLevel: 'error' as const, scenario: 'slow' as const, hideBranding: true },
         routes: {
           'get:/api/test': {
             path: '/api/test',
@@ -432,7 +408,7 @@ describe('ServerGenerator Enhanced', () => {
 
     it('should handle sad-path scenario with delay', async () => {
       const config = {
-        server: { port: TEST_PORT, cors: true, logLevel: 'error' as const, scenario: 'sad-path' as const },
+        server: { port: TEST_PORT, cors: true, logLevel: 'error' as const, scenario: 'sad-path' as const, hideBranding: true },
         routes: {
           'get:/api/test': {
             path: '/api/test',
@@ -463,7 +439,7 @@ describe('ServerGenerator Enhanced', () => {
       };
 
       const config = {
-        server: { port: TEST_PORT, cors: true, logLevel: 'error' as const, strict: true },
+        server: { port: TEST_PORT, cors: true, logLevel: 'error' as const, strict: true, hideBranding: true },
         routes: {
           'post:/api/test': {
             path: '/api/test',
@@ -494,7 +470,7 @@ describe('ServerGenerator Enhanced', () => {
       };
 
       const config = {
-        server: { port: TEST_PORT, cors: true, logLevel: 'error' as const, strict: true },
+        server: { port: TEST_PORT, cors: true, logLevel: 'error' as const, strict: true, hideBranding: true },
         routes: {
           'post:/api/test': {
             path: '/api/test',

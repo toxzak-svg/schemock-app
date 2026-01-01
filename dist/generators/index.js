@@ -36,3 +36,4 @@ function createMockServer(config) {
 }
 __exportStar(require("./server"), exports);
 __exportStar(require("./routes"), exports);
+//# sourceMappingURL=index.js.map

@@ -143,7 +143,9 @@ describe('InstallerService', () => {
 
   describe('validateInstallationPath', () => {
     it('should create directory if not exists', async () => {
-      mockFs.existsSync.mockReturnValue(false);
+      mockFs.existsSync.mockImplementation((p: fs.PathLike) => {
+        return false;
+      });
       mockFs.writeFileSync.mockReturnValue(undefined as any);
       mockFs.unlinkSync.mockReturnValue(undefined as any);
 
