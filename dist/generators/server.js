@@ -87,6 +87,10 @@ class ServerGenerator {
                 uptime: process.uptime()
             });
         });
+        // Favicon handler (prevent 404 warnings)
+        this.app.get('/favicon.ico', (req, res) => {
+            res.status(204).end();
+        });
         // 404 handler
         this.app.use((req, res) => {
             logger_1.log.warn('Route not found', {
@@ -340,7 +344,7 @@ class ServerGenerator {
                             } : item;
                         }
                         // Fallback: generate, tie to ID, and store in state for consistency
-                        let data = isSchema ? schema_1.SchemaParser.parse(responseSchema, schema, new Set(), options.strict) : routeDef.response;
+                        let data = isSchema ? schema_1.SchemaParser.parse(responseSchema, schema, new Set(), options.strict, resource) : routeDef.response;
                         if (data && typeof data === 'object' && !Array.isArray(data)) {
                             // Clone to avoid mutating the original routeDef.response
                             data = { ...data };
@@ -360,13 +364,13 @@ class ServerGenerator {
                             // Return list from state
                             if (state[resource].length === 0) {
                                 // Populate with some initial data
-                                const generated = isSchema ? schema_1.SchemaParser.parse(responseSchema, schema, new Set(), options.strict) : routeDef.response;
+                                const generated = isSchema ? schema_1.SchemaParser.parse(responseSchema, schema, new Set(), options.strict, resource) : routeDef.response;
                                 if (Array.isArray(generated)) {
                                     state[resource] = generated;
                                 }
                                 else if (isSchema) {
                                     for (let i = 0; i < 3; i++) {
-                                        const item = schema_1.SchemaParser.parse(responseSchema, schema, new Set(), options.strict);
+                                        const item = schema_1.SchemaParser.parse(responseSchema, schema, new Set(), options.strict, resource);
                                         if (item && typeof item === 'object' && !Array.isArray(item) && !item.id) {
                                             item.id = (0, uuid_1.v4)();
                                         }
@@ -389,7 +393,7 @@ class ServerGenerator {
                         else {
                             // Static or non-wrapped GET
                             if (isSchema)
-                                return schema_1.SchemaParser.parse(routeDef.response, schema, new Set(), options.strict);
+                                return schema_1.SchemaParser.parse(routeDef.response, schema, new Set(), options.strict, resource);
                             return routeDef.response;
                         }
                     }
@@ -427,8 +431,8 @@ class ServerGenerator {
                 }
                 // Default behavior if not matched
                 if (isSchema)
-                    return schema_1.SchemaParser.parse(routeDef.response, schema, new Set(), options.strict);
-                return routeDef.response || schema_1.SchemaParser.parse(schema, undefined, new Set(), options.strict);
+                    return schema_1.SchemaParser.parse(routeDef.response, schema, new Set(), options.strict, resource);
+                return routeDef.response || schema_1.SchemaParser.parse(schema, undefined, new Set(), options.strict, resource);
             };
         };
         if (schema['x-schemock-routes'] && Array.isArray(schema['x-schemock-routes'])) {

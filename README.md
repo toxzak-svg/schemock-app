@@ -11,6 +11,24 @@
 
 ---
 
+## 🚀 Quick Start (3 Commands)
+
+```bash
+# 1. Install
+curl -fsSL https://raw.githubusercontent.com/toxzak-svg/schemock-app/main/install.sh | bash
+# Windows: iwr https://raw.githubusercontent.com/toxzak-svg/schemock-app/main/install.ps1 | iex
+
+# 2. Run example
+schemock start examples/simple-user.json
+
+# 3. Hit endpoint
+open http://localhost:3000/api/data
+```
+
+That's it! You now have a working REST API with realistic mock data.
+
+---
+
 ## ✨ Why Schemock?
 
 - **⚡ Instant APIs** - From schema to working endpoint in 60 seconds
@@ -20,7 +38,45 @@
 - **🌐 Frontend Ready** - CORS enabled, perfect for React, Vue, Angular development
 - **🎯 Standards Based** - Uses JSON Schema specification (Draft 7)
 
-## 🚀 Quick Start
+---
+
+## 🆚 Why Choose Schemock? (vs Competitors)
+
+| Feature | **Schemock** | Mockoon | MockAPI | Mockaroo |
+|---------|-------------|---------|---------|----------|
+| **Install Friction** | ✅ Single binary | ❌ Desktop app | ❌ Hosted SaaS | ❌ Hosted SaaS |
+| **JSON Schema First-Class** | ✅ **Primary input** | ⚠️ Partial | ❌ No | ❌ No |
+| **CLI Friendly** | ✅ Full CLI | ❌ GUI only | ❌ Web only | ❌ Web only |
+| **Works Offline** | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
+| **Watch Mode** | ✅ Auto-reload | ✅ Yes | ❌ No | ❌ No |
+| **CORS Ready** | ✅ Built-in | ✅ Yes | ✅ Yes | ✅ Yes |
+| **Health Check** | ✅ `/health` | ❌ No | ❌ No | ❌ No |
+| **Setup Time** | **< 60 seconds** | 2-5 min | Sign up required | Sign up required |
+| **Learning Curve** | **Know JSON Schema? Done.** | Learn UI | Learn platform | Learn UI |
+
+### Key Differentiators
+
+**🎯 JSON Schema First-Class**
+- Other tools treat JSON Schema as an afterthought or import option
+- Schemock was **built for JSON Schema** from day one
+- Write schemas once, reuse across tools (validation, documentation, testing)
+
+**🚀 Zero Setup, Single Binary**
+- No Node.js, Docker, or runtime dependencies
+- Works on air-gapped systems
+- Perfect for CI/CD pipelines and testing environments
+
+**⚡ Frictionless Developer Experience**
+- 3 commands from zero to working API
+- No sign-up, no configuration, no learning curve
+- Just `schemock start your-schema.json`
+
+**📦 Production-Ready Features Out of the Box**
+- Health checks for monitoring
+- Realistic Faker-style data generation
+- Watch mode for rapid iteration
+- Multiple scenarios (slow, error-heavy, sad-path)
+
 
 ### One-Command Installation (Recommended)
 
@@ -94,10 +150,63 @@ Schemock is explicitly optimized for frontend teams blocked by backend developme
 - **API Playground**: Visual interface at `/` to explore endpoints and test requests.
 
 ### 📚 Integration Recipes
-- [Using Schemock with Vite dev server](docs/recipes.md#%E2%9A%A1-using-schemock-with-vite-dev-server)
-- [Next.js with API routes disabled](docs/recipes.md#-with-nextjs-api-routes-disabled)
-- [Cypress E2E testing with Schemock](docs/recipes.md#-with-cypress-tests)
-- [Storybook API mocking](docs/recipes.md#%F0%9F%8E%A8-with-storybook)
+
+#### ⚡ Using Schemock with Vite
+```bash
+# Auto-integrate with Vite project
+schemock init-vite
+
+# Or manually: Start Schemock in background, then Vite
+schemock start mocks/api.json --port 3001 &
+npm run dev
+```
+
+#### 🚀 Using Schemock with Next.js
+```bash
+# Start Schemock for API mocking
+schemock start mocks/api.json --port 3001
+
+# Start Next.js (API routes optional)
+npm run dev
+
+# Fetch from your pages:
+fetch('http://localhost:3001/api/data')
+```
+
+#### 🧪 Using Schemock with Cypress Tests
+```bash
+# Terminal 1: Start Schemock
+schemock start tests/api/schema.json --port 3001
+
+# Terminal 2: Run Cypress tests
+npm run cy:run
+
+# Or use in Cypress config (cypress.config.js):
+export default defineConfig({
+  e2e: {
+    setupNodeEvents(on, config) {
+      config.baseUrl = 'http://localhost:3001';
+      return config;
+    }
+  }
+})
+```
+
+#### 📮 Using Schemock with Postman/Insomnia
+```bash
+# Start Schemock
+schemock start api-schema.json --port 3001
+
+# Import this collection into Postman:
+curl http://localhost:3001/api/data
+
+# Or test directly in Postman:
+# GET http://localhost:3001/api/data
+# POST http://localhost:3001/api/data
+# Body: { "test": "data" }
+```
+
+See [complete recipes guide](docs/recipes.md) for more integrations!
 
 ---
 
@@ -130,39 +239,182 @@ Schemock is explicitly optimized for frontend teams blocked by backend developme
 
 ---
 
-## 📋 Commands Reference
+## 📋 Commands Reference (Copy-Pasta Ready)
+
+### 🚀 Quick Start Commands
 
 ```bash
-# Start server with schema
-schemock start schema.json
+# Get up and running in 30 seconds
+schemock start examples/simple-user.json
+schemock start examples/ecommerce-product.json --port 3001
+schemock start examples/blog-api.json --port 3002
+schemock start examples/task-management.json --port 3003
+schemock start examples/social-user.json --port 3004
+```
 
-# Custom port
-schemock start schema.json --port 8080
+### ⚡ Development Workflow Commands
 
-# Watch mode (auto-reload on changes)
+```bash
+# Start with watch mode (auto-reload on schema changes)
 schemock start schema.json --watch
 
-# Use a preset scenario (happy-path, slow, error-heavy, sad-path)
+# Start with custom port
+schemock start schema.json --port 8080
+
+# Start with watch mode + custom port
+schemock start schema.json --watch --port 4000
+
+# Start with debug logging
+schemock start schema.json --log-level debug
+```
+
+### 🎯 Testing Scenarios Commands
+
+```bash
+# Test with slow network (1-3s delays)
+schemock start schema.json --scenario slow
+
+# Test with random errors (400s, 500s)
+schemock start schema.json --scenario error-heavy
+
+# Test worst case (slow + errors)
 schemock start schema.json --scenario sad-path
 
-# Strict mode (enforce constraints and validate requests)
+# Test happy path (fast, no errors)
+schemock start schema.json --scenario happy-path
+
+# Combine with watch mode for iterative testing
+schemock start schema.json --scenario slow --watch
+```
+
+### 🔧 Configuration Commands
+
+```bash
+# Disable CORS (for non-browser clients)
+schemock start schema.json --no-cors
+
+# Enable strict mode (enforce all constraints)
 schemock start schema.json --strict
 
-# Validate schema and show human-readable hints
+# Everything combined
+schemock start schema.json --watch --port 3001 --scenario slow --log-level debug --strict
+```
+
+### 🛠️ Schema Management Commands
+
+```bash
+# Validate a schema (get human-readable errors)
 schemock validate schema.json
 
-# Initialize new project
+# Initialize a new project
 schemock init my-api
 
 # Generate CRUD schema for a resource
 schemock crud product
+schemock crud user
+schemock crud order
 
-# Integrate with a Vite project
+# Initialize Vite integration
 schemock init-vite
+```
 
-# Get help
+### 📦 Multi-Server Commands
+
+```bash
+# Run multiple mock servers on different ports
+schemock start users.json --port 3001 &
+schemock start products.json --port 3002 &
+schemock start orders.json --port 3003 &
+```
+
+### 🐛 Debugging Commands
+
+```bash
+# Enable verbose debug output
+schemock start schema.json --log-level debug
+
+# Check schema validity before starting
+schemock validate schema.json && schemock start schema.json
+
+# Test health endpoint
+curl http://localhost:3000/health
+```
+
+### 💡 Common Use Cases
+
+```bash
+# React/Vite development
+schemock start mocks/api.json --port 3001 --watch
+
+# Next.js development
+schemock start mocks/api.json --port 3001
+# Then run: npm run dev
+
+# Cypress E2E testing
+schemock start tests/api/schema.json --port 3001 --scenario slow
+# Then run: npm run cy:run
+
+# CI/CD pipeline
+schemock start ci/schema.json --scenario happy-path --log-level info
+
+# Multiple environments
+schemock start dev-schema.json --port 3001 --scenario happy-path
+schemock start test-schema.json --port 3002 --scenario sad-path
+schemock start staging-schema.json --port 3003 --scenario slow
+```
+
+### 📚 Getting Help
+
+```bash
+# Show main help
 schemock --help
+
+# Show start command help
 schemock start --help
+
+# Show validate command help
+schemock validate --help
+
+# Show init command help
+schemock init --help
+
+# Show crud command help
+schemock crud --help
+```
+
+### 🔑 All Command Options
+
+```bash
+schemock start [schemaPath] [options]
+
+Options:
+  -p, --port <number>          Server port (default: 3000)
+  -w, --watch                 Watch for schema changes and auto-reload
+  --no-cors                   Disable CORS headers
+  --log-level <level>         Log level: error, warn, info, debug
+  --scenario <preset>          Preset scenario: happy-path, slow, error-heavy, sad-path
+  --strict                    Enable strict validation mode
+  -h, --help                  Display help for this command
+
+schemock validate [schemaPath] [options]
+
+Options:
+  -h, --help                  Display help for this command
+
+schemock init [projectName] [options]
+
+Options:
+  -h, --help                  Display help for this command
+
+schemock crud <resourceName> [options]
+
+Options:
+  -h, --help                  Display help for this command
+
+schemock init-vite [options]
+
+Options:
+  -h, --help                  Display help for this command
 ```
 
 ## ⚡ Vite & React Integration

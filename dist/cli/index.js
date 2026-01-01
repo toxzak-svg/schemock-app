@@ -30,6 +30,7 @@ program
     .option('-w, --watch', 'Watch schema file for changes and auto-reload')
     .option('--scenario <preset>', 'Preset scenario (happy-path, slow, error-heavy, sad-path)', 'happy-path')
     .option('--strict', 'Enforce strict schema validation', false)
+    .option('--resource <name>', 'Resource name for default schema (when no schema file is provided)')
     .action(async (schemaPath, options) => {
     try {
         // Set log level first
@@ -41,13 +42,20 @@ program
             process.exit(1);
         }
         const strict = options.strict || false;
+        const resourceOption = options.resource;
         let schema = {
             type: 'object',
             properties: {
-                message: { type: 'string' },
-                timestamp: { type: 'string', format: 'date-time' }
-            }
+                id: { type: 'string', format: 'uuid' },
+                name: { type: 'string' },
+                email: { type: 'string', format: 'email' },
+                createdAt: { type: 'string', format: 'date-time' }
+            },
+            required: ['id', 'name']
         };
+        if (resourceOption) {
+            schema.title = resourceOption;
+        }
         // Validate and load schema from file if provided
         if (schemaPath) {
             try {
@@ -337,12 +345,12 @@ Once the server is running, visit [http://localhost:${port}](http://localhost:${
         (0, fs_1.writeFileSync)((0, path_1.join)(projectDir, 'schema.json'), JSON.stringify(sampleSchema, null, 2));
         (0, fs_1.writeFileSync)((0, path_1.join)(projectDir, 'README.md'), projectReadme);
         (0, fs_1.writeFileSync)((0, path_1.join)(projectDir, '.gitignore'), 'node_modules/\n.env\n.DS_Store\n*.log\n');
-        console.log(chalk_1.default.green(`✅ Project initialized in ${projectDir}`));
-        console.log(chalk_1.default.blue('👉 Next steps:'));
-        console.log(chalk_1.default.blue(`  cd ${directory !== '.' ? directory : 'your-project'}`));
-        console.log(chalk_1.default.blue('  npm install'));
-        console.log(chalk_1.default.blue('  npm start'));
-        console.log(chalk_1.default.blue('\nEdit index.js to customize your mock server'));
+        console.log(chalk_1.default.green(`\n✨ Project ${chalk_1.default.bold(projectName)} initialized successfully in ${chalk_1.default.bold(projectDir)}!`));
+        console.log(chalk_1.default.blue('\nNext steps:'));
+        console.log(`  1. ${chalk_1.default.cyan(`cd ${directory !== '.' ? directory : 'your-project'}`)}`);
+        console.log(`  2. ${chalk_1.default.cyan('npm install')}`);
+        console.log(`  3. ${chalk_1.default.cyan('npm start')}`);
+        console.log(chalk_1.default.yellow('\nHappy mocking! 🚀'));
     }
     catch (error) {
         const message = error instanceof Error ? (0, errors_1.formatError)(error) : 'Unknown error occurred';
@@ -477,6 +485,28 @@ program
         process.exit(1);
     }
 });
+// Recipes command
+program
+    .command('recipes')
+    .description('Show common integration recipes and guides')
+    .action(() => {
+    try {
+        const recipesPath = (0, path_1.resolve)(__dirname, '../../docs/recipes.md');
+        if ((0, fs_1.existsSync)(recipesPath)) {
+            const content = (0, fs_1.readFileSync)(recipesPath, 'utf-8');
+            console.log(chalk_1.default.bold.blue('\n--- Schemock Recipes ---\n'));
+            console.log(content);
+            console.log(chalk_1.default.bold.blue('\n--- End of Recipes ---\n'));
+        }
+        else {
+            console.log(chalk_1.default.yellow('\n⚠️  Recipes documentation not found locally.'));
+            console.log(chalk_1.default.blue('🌐 Visit: https://github.com/toxzak-svg/schemock-app/blob/main/docs/recipes.md\n'));
+        }
+    }
+    catch (error) {
+        console.error(chalk_1.default.red('❌ Error reading recipes:'), error);
+    }
+});
 // Install command
 program
     .command('install')
@@ -507,10 +537,11 @@ ${chalk_1.default.yellow('Quick Start:')}
   ${chalk_1.default.cyan('schemock start schema.json')}     Start with custom schema
   ${chalk_1.default.cyan('schemock start')}                 Start with default schema
   ${chalk_1.default.cyan('schemock init my-api')}         Initialize new project
+  ${chalk_1.default.cyan('schemock recipes')}              Show integration guides
 
 ${chalk_1.default.yellow('Examples:')}
   ${chalk_1.default.cyan('schemock start user.json --port 8080')}
-  ${chalk_1.default.cyan('schemock start api.json --log-level debug')}
+  ${chalk_1.default.cyan('schemock start --resource products')}
   ${chalk_1.default.cyan('schemock init ecommerce-api --name "E-commerce API"')}
 
 ${chalk_1.default.yellow('For detailed help:')}

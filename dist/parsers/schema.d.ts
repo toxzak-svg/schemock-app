@@ -7,13 +7,14 @@ export declare class SchemaParser {
      * @param visited - Set of visited references to prevent circular loops
      * @param strict - Whether to enforce strict validation
      */
-    static parse(schema: Schema, rootSchema?: Schema, visited?: Set<string>, strict?: boolean): any;
+    static parse(schema: Schema, rootSchema?: Schema, visited?: Set<string>, strict?: boolean, propertyName?: string): any;
     /**
      * Resolve a JSON Schema $ref reference
      * @param ref - The reference string (e.g., "#/definitions/User")
      * @param rootSchema - The root schema containing definitions
      * @param visited - Set of visited references to prevent circular loops
      * @param strict - Whether to enforce strict validation
+     * @param propertyName - Optional property name for heuristics
      */
     private static resolveRef;
     private static generateString;

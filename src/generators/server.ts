@@ -101,6 +101,11 @@ export class ServerGenerator {
       });
     });
 
+    // Favicon handler (prevent 404 warnings)
+    this.app.get('/favicon.ico', (req: Request, res: Response) => {
+      res.status(204).end();
+    });
+
     // 404 handler
     this.app.use((req: Request, res: Response) => {
       log.warn('Route not found', {

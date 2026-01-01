@@ -110,6 +110,35 @@ Complete task schema with:
 
 ---
 
+### 5. Blog API (`blog-api.json`)
+**Perfect for:** CMS, blogging platforms, content management systems
+
+Complete blog post schema with:
+- Rich post content (title, excerpt, markdown content)
+- Author information with nested profile
+- Categories and tags
+- Publication workflow (draft, published, archived)
+- Metadata (reading time, views, likes)
+- Comments array
+- Featured image and status flags
+
+```powershell
+.\schemock.exe start examples\blog-api.json --port 3004
+# Open: http://localhost:3004/api/data
+```
+
+**Use Case:** Blogging platforms, content management systems, news sites, or any content-driven application.
+
+**Features Demonstrated:**
+- Complex nested objects (author, metadata, comments)
+- Enum-based status workflows
+- Array with nested objects (comments)
+- Multiple format types (uuid, email, uri, date-time)
+- Pattern validation (slug field)
+- Multiple constraints (minLength, maxLength, minItems, maxItems)
+
+---
+
 ## Testing All Examples
 
 Use the provided demo script to test all examples:
