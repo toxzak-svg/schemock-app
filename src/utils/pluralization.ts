@@ -22,7 +22,12 @@ export function pluralize(noun: string): string {
   }
 
   // Words ending in s, x, z, ch, sh -> add 'es'
-  if (/[sxz]$/.test(word) || word.endsWith('ch') || word.endsWith('sh')) {
+  // But skip if the word already ends with 's' and looks pluralized (e.g., "items", "users")
+  if (word.endsWith('s') && word.length > 3 && !word.endsWith('ss')) {
+    // Word already ends with 's' and looks pluralized, return as is
+    return noun;
+  }
+  if (/[xz]$/.test(word) || word.endsWith('ch') || word.endsWith('sh')) {
     return noun + 'es';
   }
 

@@ -9,7 +9,7 @@ import { smartPluralize } from '../utils/pluralization';
 export function generateRouteConfigs(schema: Schema): Record<string, any> {
   const resourceName = schema.title?.toLowerCase() || 'items';
   const resourceNamePlural = smartPluralize(resourceName);
-  
+
   return {
     // GET all items
     [`get:/api/${resourceNamePlural}`]: {
@@ -26,7 +26,7 @@ export function generateRouteConfigs(schema: Schema): Record<string, any> {
         }
       })
     },
-    
+
     // GET item by ID
     [`get:/api/${resourceNamePlural}/:id`]: {
       path: `/api/${resourceNamePlural}/:id`,
@@ -43,7 +43,7 @@ export function generateRouteConfigs(schema: Schema): Record<string, any> {
         }
       })
     },
-    
+
     // CREATE new item
     [`post:/api/${resourceNamePlural}`]: {
       path: `/api/${resourceNamePlural}`,
@@ -58,7 +58,7 @@ export function generateRouteConfigs(schema: Schema): Record<string, any> {
         }
       })
     },
-    
+
     // UPDATE item
     [`put:/api/${resourceNamePlural}/:id`]: {
       path: `/api/${resourceNamePlural}/:id`,
@@ -72,7 +72,7 @@ export function generateRouteConfigs(schema: Schema): Record<string, any> {
         }
       })
     },
-    
+
     // DELETE item
     [`delete:/api/${resourceNamePlural}/:id`]: {
       path: `/api/${resourceNamePlural}/:id`,
@@ -90,11 +90,12 @@ export function generateRouteConfigs(schema: Schema): Record<string, any> {
 export function generateRoutes(schema: Schema): string {
   const resourceName = schema.title?.toLowerCase() || 'items';
   const resourceNamePlural = smartPluralize(resourceName);
-  
+
   return `const express = require('express');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
 
+// Base path: /api/${resourceNamePlural}
 // In-memory database
 let db = [];
 
@@ -190,7 +191,7 @@ module.exports = router;`;
  */
 export function generateCRUDDSL(resourceName: string): any[] {
   const resourceNamePlural = smartPluralize(resourceName);
-  
+
   return [
     {
       path: `/api/${resourceNamePlural}`,
