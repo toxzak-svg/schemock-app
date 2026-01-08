@@ -1,4 +1,4 @@
-import { Schema, JSONValue, isJSONValue, isSchema } from '../types';
+import { Schema, JSONValue, NonNullJSONValue, isJSONValue, isSchema } from '../types';
 import { SchemaParseError, SchemaRefError } from '../errors';
 import { LRUCache, createCacheKey } from '../utils/cache';
 import { DEFAULT_CACHE_SIZE, CACHE_TTL } from '../utils/constants';
@@ -47,7 +47,7 @@ export class SchemaParser {
    * @param strict - Whether to enforce strict validation
    * @param useCache - Whether to use caching (default: true)
    */
-  static parse(schema: Schema, rootSchema?: Schema, visited: Set<string> = new Set(), strict: boolean = false, propertyName?: string, useCache: boolean = true): JSONValue {
+  static parse(schema: Schema, rootSchema?: Schema, visited: Set<string> = new Set(), strict: boolean = false, propertyName?: string, useCache: boolean = true): NonNullJSONValue {
     if (!schema) {
       throw new SchemaParseError('Schema is required');
     }
@@ -59,13 +59,13 @@ export class SchemaParser {
 
     if (cacheKey && schemaCache.has(cacheKey)) {
       const cached = schemaCache.get(cacheKey);
-      if (cached !== undefined) {
-        return cached;
+      if (cached !== undefined && cached !== null) {
+        return cached as NonNullJSONValue;
       }
     }
 
     const root = rootSchema || schema;
-    let result: JSONValue;
+    let result: NonNullJSONValue;
 
     // Handle references
     if (schema.$ref) {
@@ -102,7 +102,7 @@ export class SchemaParser {
   /**
    * Parse schema based on its type
    */
-  private static parseByType(schema: Schema, rootSchema: Schema, visited: Set<string>, strict: boolean, propertyName?: string): JSONValue {
+  private static parseByType(schema: Schema, rootSchema: Schema, visited: Set<string>, strict: boolean, propertyName?: string): NonNullJSONValue {
     switch (schema.type) {
       case 'string':
         return this.generateString(schema, strict, propertyName);
@@ -116,7 +116,7 @@ export class SchemaParser {
       case 'object':
         return this.generateObject(schema, rootSchema, visited, strict);
       case 'null':
-        return null;
+        return {} as NonNullJSONValue; // Return empty object instead of null for type safety
       default:
         if (Array.isArray(schema.type)) {
           // If multiple types are allowed, pick one randomly
@@ -141,17 +141,17 @@ export class SchemaParser {
    * @param strict - Whether to enforce strict validation
    * @param propertyName - Optional property name for heuristics
    */
-  private static resolveRef(ref: string, rootSchema: Schema, visited: Set<string>, strict: boolean = false, propertyName?: string): JSONValue {
+  private static resolveRef(ref: string, rootSchema: Schema, visited: Set<string>, strict: boolean = false, propertyName?: string): NonNullJSONValue {
     // Check for circular references
     if (visited.has(ref)) {
       console.warn(`Circular reference detected: ${ref}`);
-      return null;
+      return {} as NonNullJSONValue; // Return empty object for circular refs instead of null
     }
 
     // Only handle internal references for now (starting with #/)
     if (!ref.startsWith('#/')) {
       console.warn(`External references not supported yet: ${ref}`);
-      return 'EXTERNAL_REF_NOT_SUPPORTED';
+      return 'EXTERNAL_REF_NOT_SUPPORTED' as NonNullJSONValue;
     }
 
     // Parse the reference path
@@ -318,7 +318,7 @@ export class SchemaParser {
     return random() > 0.5;
   }
 
-  private static generateArray(schema: Schema, rootSchema?: Schema, visited: Set<string> = new Set(), strict: boolean = false): JSONValue[] {
+  private static generateArray(schema: Schema, rootSchema?: Schema, visited: Set<string> = new Set(), strict: boolean = false): NonNullJSONValue[] {
     const minItems = schema.minItems || (strict ? 1 : 0);
     const maxItems = schema.maxItems || Math.max(minItems + (strict ? 2 : 5), 10);
     const count = minItems + randomInt(0, maxItems - minItems);
@@ -327,7 +327,7 @@ export class SchemaParser {
       return [];
     }
 
-    const result: JSONValue[] = [];
+    const result: NonNullJSONValue[] = [];
     const root = rootSchema || schema;
 
     if (Array.isArray(schema.items)) {
@@ -345,12 +345,12 @@ export class SchemaParser {
     return result;
   }
 
-  private static generateObject(schema: Schema, rootSchema?: Schema, visited: Set<string> = new Set(), strict: boolean = false): Record<string, JSONValue> {
+  private static generateObject(schema: Schema, rootSchema?: Schema, visited: Set<string> = new Set(), strict: boolean = false): Record<string, NonNullJSONValue> {
     if (!schema.properties) {
       return {};
     }
 
-    const result: Record<string, JSONValue> = {};
+    const result: Record<string, NonNullJSONValue> = {};
     const required = new Set(schema.required || []);
     const root = rootSchema || schema;
 

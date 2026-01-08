@@ -4,6 +4,9 @@ export type JSONValue = string | number | boolean | null | JSONObject | JSONArra
 export type JSONObject = { [key: string]: JSONValue };
 export type JSONArray = JSONValue[];
 
+// Non-null JSON value type for cases where null is not expected
+export type NonNullJSONValue = string | number | boolean | JSONObject | JSONArray;
+
 export type SchemaEnumValue = string | number | boolean | null;
 
 export interface Schema {
