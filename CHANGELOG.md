@@ -270,7 +270,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Fixed` - Bug fixes
 - `Security` - Security improvements and fixes
 
-[Unreleased]: https://github.com/toxzak-svg/schemocker/compare/2.0.0...HEAD
-[2.0.0]: https://github.com/toxzak-svg/schemocker/releases/tag/2.0.0
+[Unreleased]: https://github.com/toxzak-svg/schemocker/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/toxzak-svg/schemocker/releases/tag/v2.0.0
 [1.0.1]: https://github.com/toxzak-svg/schemocker/releases/tag/v1.0.1
 [1.0.0]: https://github.com/toxzak-svg/schemocker/releases/tag/v1.0.0
