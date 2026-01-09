@@ -1,19 +1,19 @@
 # Schemock
 
-> **Build React/Next/Vue UIs before your backend exists: turn a JSON schema into a live API in under 60 seconds.**
+> **Build React/Next/Vue UIs before your backend exists — turn a JSON schema into a live API in under 60 seconds.**
 
 [![GitHub release](https://img.shields.io/github/v/release/toxzak-svg/schemock-app)](https://github.com/toxzak-svg/schemock-app/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/tests-176%20passing-success)](.)
 [![Coverage](https://img.shields.io/badge/coverage-76.88%25-green)](.)
 
-**Stop waiting on backend teams or hardcoding mock data.** Schemock generates realistic, production-ready REST APIs from JSON schemas in seconds. Perfect for frontend developers building React, Next.js, Vue, or any modern web application.
+**Stop waiting on backend teams or hardcoding mock data.** Schemock generates realistic, production-ready REST APIs from JSON schemas in seconds — perfect for frontend developers building React, Next.js, Vue, or any modern web application.
 
 ---
 
-## 🎯 What Schemock Does
+## 🎯 What Is Schemock?
 
-Copy a schema, run one command, and start building your UI:
+Copy a schema, run one command, and instantly start building your UI:
 
 ```json
 // user-schema.json
@@ -43,9 +43,9 @@ fetch('http://localhost:3000/api/data')
 
 ---
 
-## 🎯 Frontend Quickstart
+## 🎯 Frontend Quick Start
 
-Get your React, Next.js, or Vue app connected to a mock API in 5 minutes. No backend required.
+Get your React, Next.js, or Vue app connected to a mock API in 5 minutes — no backend required.
 
 ### ⚛️ Using Schemock with React (Vite/CRA)
 
@@ -222,9 +222,9 @@ onMounted(async () => {
 
 ---
 
-### 📦 Ready-Made Schemas for Common Screens
+### 📦 Ready-Made Schemas for Common Use Cases
 
-Don't want to write schemas? Use these ready-to-run examples:
+Don't want to write schemas from scratch? Use these ready-to-run examples:
 
 | Use Case | Schema | Command | Port |
 |----------|--------|---------|------|
@@ -238,36 +238,36 @@ All schemas include realistic data, proper types, and are ready for production u
 
 ---
 
-## 🚀 Quick Start (3 Commands)
+## 🚀 Quick Start (3 Simple Commands)
 
 ```bash
-# 1. Install
+# 1. Install Schemock
 curl -fsSL https://raw.githubusercontent.com/toxzak-svg/schemock-app/main/install.sh | bash
 # Windows: iwr https://raw.githubusercontent.com/toxzak-svg/schemock-app/main/install.ps1 | iex
 
-# 2. Run example
+# 2. Start a mock server with an example schema
 schemock start examples/simple-user.json
 
-# 3. Hit endpoint
+# 3. Test the endpoint in your browser
 open http://localhost:3000/api/data
 ```
 
-That's it! You now have a working REST API with realistic mock data.
+**That's it!** You now have a working REST API with realistic mock data.
 
 ---
 
-## ✨ Why Schemock?
+## ✨ Why Choose Schemock?
 
-- **⚡ Instant APIs** - From schema to working endpoint in 60 seconds
-- **🚫 Zero Dependencies** - Download .exe and run. No Node.js, npm, or installations needed
-- **📊 Realistic Data** - UUIDs, emails, timestamps, and proper data formats out of the box
-- **🔄 Hot Reload** - Watch mode auto-reloads when you change schemas
-- **🌐 Frontend Ready** - CORS enabled, perfect for React, Vue, Angular development
-- **🎯 Standards Based** - Uses JSON Schema specification (Draft 7)
+- **⚡ Instant APIs** — From schema to working endpoint in 60 seconds
+- **🚫 Zero Dependencies** — Download and run. No Node.js, npm, or complex installations
+- **📊 Realistic Data** — Auto-generates UUIDs, emails, timestamps, and proper data formats
+- **🔄 Hot Reload** — Watch mode auto-reloads when you change schemas
+- **🌐 Frontend Ready** — CORS enabled by default, perfect for React, Vue, Angular development
+- **🎯 Standards Based** — Uses JSON Schema specification (Draft 7)
 
 ---
 
-## 🆚 Why Choose Schemock? (vs Competitors)
+## 🆚 Schemock vs. Alternatives
 
 | Feature | **Schemock** | Mockoon | MockAPI | Mockaroo |
 |---------|-------------|---------|---------|----------|
@@ -281,34 +281,34 @@ That's it! You now have a working REST API with realistic mock data.
 | **Setup Time** | **< 60 seconds** | 2-5 min | Sign up required | Sign up required |
 | **Learning Curve** | **Know JSON Schema? Done.** | Learn UI | Learn platform | Learn UI |
 
-### Key Differentiators
+### What Makes Schemock Different?
 
-**🎯 JSON Schema First-Class**
-- Other tools treat JSON Schema as an afterthought or import option
-- Schemock was **built for JSON Schema** from day one
-- Write schemas once, reuse across tools (validation, documentation, testing)
+**🎯 JSON Schema as First-Class Citizen**
+- Other tools treat JSON Schema as an afterthought or optional import
+- Schemock was **built specifically for JSON Schema** from day one
+- Write schemas once, reuse everywhere (validation, documentation, testing)
 
-**🚀 Zero Setup, Single Binary**
-- No Node.js, Docker, or runtime dependencies
-- Works on air-gapped systems
-- Perfect for CI/CD pipelines and testing environments
+**🚀 Zero Setup — Single Binary**
+- No Node.js, Docker, or runtime dependencies required
+- Works on air-gapped systems and offline environments
+- Perfect for CI/CD pipelines and automated testing
 
 **⚡ Frictionless Developer Experience**
-- 3 commands from zero to working API
-- No sign-up, no configuration, no learning curve
-- Just `schemock start your-schema.json`
+- Just 3 commands from zero to a working API
+- No account sign-up, no complex configuration, no learning curve
+- Simply run `schemock start your-schema.json` and you're done
 
-**📦 Production-Ready Features Out of the Box**
-- Health checks for monitoring
+**📦 Production-Ready Features Included**
+- Built-in health checks for monitoring
 - Realistic Faker-style data generation
-- Watch mode for rapid iteration
-- Multiple scenarios (slow, error-heavy, sad-path)
+- Watch mode for rapid development iteration
+- Test scenarios (slow network, error-heavy, sad-path)
 
 ---
 
-## 🤔 Why Not Just Hardcode Data / MSW / JSON Server?
+## 🤔 Why Not Just Use Hardcoded Data, MSW, or JSON Server?
 
-You might be wondering: *"Why not just hardcode JSON in my app or use existing mock tools?"* Here's why Schemock is different:
+You might be wondering: *"Why not just hardcode JSON in my app or use existing tools?"* Here's why Schemock is different:
 
 ### ❌ Hardcoding Mock Data in Your App
 
@@ -323,12 +323,12 @@ const users = [
 // This data gets stale, needs manual updates, and clutters your codebase
 ```
 
-**Why This Fails:**
-- **Data Rots:** Hardcoded data gets outdated when your real API changes
-- **Maintenance Hell:** You have to update mock data in multiple files across your codebase
-- **Inconsistent:** Different components might show different mock data
+**Why This Approach Fails:**
+- **Data Gets Stale:** Hardcoded data becomes outdated when your real API changes
+- **Maintenance Nightmare:** You must update mock data in multiple files across your codebase
+- **Inconsistency:** Different components may show conflicting mock data
 - **No Realism:** Static data doesn't test loading states, errors, or edge cases
-- **Code Bloat:** Mock data sits in your production codebase
+- **Code Bloat:** Mock data pollutes your production codebase
 
 **How Schemock Fixes It:**
 ```json
@@ -342,17 +342,17 @@ const users = [
   }
 }
 ```
-- ✅ Single schema file shared with backend team
-- ✅ Data is external to your app
-- ✅ All components fetch from the same endpoint
-- ✅ Test slow networks, errors, and edge cases with scenarios
+- ✅ Single schema file shared between frontend and backend teams
+- ✅ Mock data stays external to your application code
+- ✅ All components fetch from the same consistent endpoint
+- ✅ Test slow networks, errors, and edge cases using scenarios
 
 ---
 
 ### ❌ MSW (Mock Service Worker)
 
 **The Problem:**
-MSW is great for unit tests, but it's not designed for development workflows.
+MSW is excellent for unit tests, but it's not designed for active development workflows.
 
 **Why It's Painful for Development:**
 ```javascript
@@ -372,30 +372,30 @@ const handlers = [
 setupWorker(...handlers).start();
 ```
 
-**The Issues:**
-- **Setup Heavy:** Requires configuring handlers, workers, and interceptors
-- **In Your App Code:** Mock handlers live in your production codebase
-- **Complex for Multiple Scenarios:** Hard to toggle between fast/slow/error states
-- **Team Sharing:** Other developers need to set up their own handlers
-- **Limited to Browser:** Doesn't work for non-browser tools (Postman, curl)
+**The Challenges:**
+- **Setup Heavy:** Requires configuring handlers, workers, and interceptors in your code
+- **Lives in Your App:** Mock handlers become part of your production codebase
+- **Complex Scenarios:** Difficult to toggle between fast/slow/error states
+- **Sharing is Hard:** Other developers need to set up their own handlers
+- **Browser Only:** Doesn't work with non-browser tools like Postman or curl
 
 **How Schemock Fixes It:**
 ```bash
 schemock start user-schema.json --scenario slow
 # That's it. No code changes. No setup in your app.
 ```
-- ✅ Zero setup in your app
-- ✅ External mock server - works with any HTTP client
-- ✅ Easy scenario switching (slow, error-heavy, happy-path)
-- ✅ Team sharing: one schema file, everyone uses the same mock server
-- ✅ Works with Postman, curl, and all HTTP tools
+- ✅ Zero setup required in your application
+- ✅ External mock server works with any HTTP client
+- ✅ Easy scenario switching with command-line flags (slow, error-heavy, happy-path)
+- ✅ Simple team sharing: one schema file, everyone uses the same mock server
+- ✅ Works with Postman, curl, and all HTTP-based tools
 
 ---
 
 ### ❌ JSON Server
 
 **The Problem:**
-JSON Server is a classic choice, but it requires a database-like structure and manual data entry.
+JSON Server is a classic choice, but it requires a database-like structure and extensive manual data entry.
 
 **Why It's Frustrating:**
 ```json
@@ -414,12 +414,12 @@ JSON Server is a classic choice, but it requires a database-like structure and m
 ```
 
 **The Pain Points:**
-- **Manual Data Entry:** You have to write every single record by hand
-- **No Realistic Data:** You get what you type - no realistic UUIDs, emails, dates
-- **Static Data:** Each request returns the same static data
-- **Schema-First? No:** It's database-first, not schema-first
+- **Manual Data Entry:** You must write every single record by hand
+- **No Realistic Data:** You only get what you manually type — no realistic UUIDs, emails, or dates
+- **Static Data:** Each request returns the exact same static data
+- **Not Schema-First:** It's database-first, not schema-first approach
 - **No Schema Validation:** No guarantee your mock data matches your real API contract
-- **Limited Types:** Hard to model complex nested structures
+- **Limited Types:** Difficult to model complex nested structures
 
 **How Schemock Fixes It:**
 ```json
@@ -442,29 +442,29 @@ JSON Server is a classic choice, but it requires a database-like structure and m
   }
 }
 ```
-- ✅ No manual data entry - define structure, get infinite data
-- ✅ Realistic data - proper UUIDs, emails, dates automatically
-- ✅ Schema-first - matches your backend contract exactly
-- ✅ Type-safe - validates against your schema
-- ✅ Complex structures - nested objects, arrays, enums all supported
+- ✅ No manual data entry — define the structure, get infinite realistic data
+- ✅ Realistic data — proper UUIDs, emails, dates generated automatically
+- ✅ Schema-first approach — matches your backend contract exactly
+- ✅ Type-safe — validates against your schema automatically
+- ✅ Complex structures supported — nested objects, arrays, and enums all work
 
 ---
 
-### 🎯 When to Use Schemock vs Other Tools
+### 🎯 When to Use Schemock vs. Other Tools
 
 | Scenario | Use Schemock When... | Use MSW When... | Use JSON Server When... |
 |----------|---------------------|-------------------|----------------------|
-| **Development** | ✅ Building UI before backend exists | ❌ Overkill for simple dev | ⚠️ Only if you already have JSON data |
-| **Unit Tests** | ⚠️ Use MSW instead | ✅ Testing component isolation | ❌ Not suited for unit tests |
-| **E2E Tests** | ✅ Mock backend for Cypress/Playwright | ✅ Can use MSW | ⚠️ Possible but less ideal |
-| **API Design** | ✅ Prototype with frontend team | ❌ Not designed for this | ❌ Requires manual data entry |
-| **Schema Sharing** | ✅ Single source of truth | ❌ No schema concept | ❌ No schema concept |
-| **Team Collaboration** | ✅ Share schema files | ❌ Code-based mocks hard to share | ⚠️ Need to share JSON files |
+| **Development** | ✅ Building UI before backend exists | ❌ Overkill for simple dev workflows | ⚠️ Only if you already have JSON data files |
+| **Unit Tests** | ⚠️ MSW is better for this | ✅ Testing component isolation | ❌ Not suited for unit tests |
+| **E2E Tests** | ✅ Mock backend for Cypress/Playwright | ✅ MSW also works well here | ⚠️ Possible but less ideal |
+| **API Design** | ✅ Prototype APIs with frontend team | ❌ Not designed for this purpose | ❌ Requires manual data entry |
+| **Schema Sharing** | ✅ Single source of truth for contracts | ❌ No schema concept | ❌ No schema concept |
+| **Team Collaboration** | ✅ Share schema files easily | ❌ Code-based mocks hard to share | ⚠️ Must share JSON files |
 
 **Bottom Line:** 
-- **Use Schemock** for frontend development, API prototyping, and when you want a schema-driven approach
-- **Use MSW** for unit tests and component isolation
-- **Use JSON Server** only if you already have a JSON database to serve
+- **Use Schemock** for frontend development, API prototyping, and schema-driven workflows
+- **Use MSW** for unit tests and isolated component testing
+- **Use JSON Server** only if you already have a JSON database file to serve
 
 ---
 
