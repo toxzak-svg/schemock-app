@@ -84,29 +84,56 @@ export interface MockServerConfig {
 }
 /**
  * Type guard to check if a value is a valid JSONValue
+ *
+ * @param value - The value to check
+ * @returns True if the value is a valid JSONValue (string, number, boolean, null, object, or array)
  */
 export declare function isJSONValue(value: unknown): value is JSONValue;
 /**
  * Type guard to check if a value is a JSONObject
+ *
+ * @param value - The value to check
+ * @returns True if the value is a plain object (not null and not an array)
  */
 export declare function isJSONObject(value: unknown): value is JSONObject;
 /**
  * Type guard to check if a value is a JSONArray
+ *
+ * @param value - The value to check
+ * @returns True if the value is an array
  */
 export declare function isJSONArray(value: unknown): value is JSONArray;
 /**
  * Type guard to check if a value is a Schema
+ *
+ * Checks if the value is an object with common JSON Schema properties.
+ *
+ * @param value - The value to check
+ * @returns True if the value appears to be a valid JSON Schema
  */
 export declare function isSchema(value: unknown): value is Schema;
 /**
  * Type guard to check if a value is a ResponseHandler function
+ *
+ * @param value - The value to check
+ * @returns True if the value is a function
  */
 export declare function isResponseHandler(value: unknown): value is ResponseHandler;
 /**
  * Type guard to check if a value is a valid RouteResponse
+ *
+ * A RouteResponse can be a JSONValue, Schema, or ResponseHandler function.
+ *
+ * @param value - The value to check
+ * @returns True if the value is a valid RouteResponse type
  */
 export declare function isRouteResponse(value: unknown): value is RouteResponse;
 /**
  * Type guard to check if a value is a valid SchemaEnumValue
+ *
+ * Schema enum values can be strings, numbers, booleans, or null.
+ *
+ * @param value - The value to check
+ * @returns True if the value is a valid schema enum value
  */
 export declare function isSchemaEnumValue(value: unknown): value is SchemaEnumValue;

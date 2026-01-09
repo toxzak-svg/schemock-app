@@ -103,11 +103,19 @@ export function getPlaygroundHTML(routes: Record<string, RouteConfig>): string {
         }
         h1 { 
           border-bottom: 2px solid var(--border-color); 
-          padding-bottom: 10px; 
+          padding-bottom: 15px; 
           color: var(--text-color);
           display: flex;
           align-items: center;
           gap: 10px;
+          margin-bottom: 10px;
+          font-size: 32px;
+        }
+        .subtitle {
+          color: #7f8c8d;
+          font-size: 16px;
+          margin-top: -5px;
+          margin-bottom: 25px;
         }
         .route-card { 
           background: var(--card-bg); 
@@ -251,45 +259,55 @@ export function getPlaygroundHTML(routes: Record<string, RouteConfig>): string {
         .status-error { color: var(--delete-color); font-weight: bold; }
         
         .footer { 
-          margin-top: 40px; 
+          margin-top: 50px; 
           font-size: 14px; 
           color: #7f8c8d; 
           text-align: center; 
-          padding-top: 20px; 
+          padding: 30px 20px 20px; 
           border-top: 1px solid var(--border-color); 
         }
         .footer a { color: var(--primary-color); text-decoration: none; }
+        .footer a:hover { text-decoration: underline; }
+        .made-with { 
+          font-size: 15px; 
+          margin-bottom: 12px; 
+        }
         
         .header-actions {
           display: flex;
           gap: 15px;
-          margin: 20px 0;
+          margin: 25px 0;
           justify-content: center;
+          flex-wrap: wrap;
         }
         .btn-share {
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           color: white;
-          padding: 10px 20px;
+          padding: 12px 24px;
           font-size: 15px;
+          transition: all 0.3s ease;
         }
         .btn-share:hover {
           transform: translateY(-2px);
-          box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
         }
         .btn-gallery {
           background: #10b981;
           color: white;
           text-decoration: none;
+          padding: 12px 24px;
+          transition: all 0.3s ease;
         }
         .btn-gallery:hover {
           background: #059669;
           transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
         }
       </style>
     </head>
     <body>
       <h1>🚀 Schemock Playground</h1>
-      <p>Explore and test your generated mock APIs.</p>
+      <p class="subtitle">Explore and test your generated mock APIs</p>
       
       <div class="header-actions">
         <button class="btn btn-share" onclick="shareSchema()">
