@@ -6,76 +6,39 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ServerGenerator = void 0;
 exports.createMockServer = createMockServer;
 const express_1 = __importDefault(require("express"));
-const cors_1 = __importDefault(require("cors"));
-const uuid_1 = require("uuid");
-const schema_1 = require("../parsers/schema");
 const errors_1 = require("../errors");
 const logger_1 = require("../utils/logger");
 const validation_1 = require("../utils/validation");
-const playground_1 = require("./playground");
+const config_1 = require("../utils/config");
+const middleware_1 = require("./middleware");
+const route_setup_1 = require("./route-setup");
+const response_utils_1 = require("./response-utils");
+const schema_routes_1 = require("./schema-routes");
 class ServerGenerator {
-    constructor(config) {
+    constructor(config, skipValidation = false) {
         this.server = null;
         this.state = {};
         this.version = require('../../package.json').version;
-        this.config = config;
+        this.connections = new Set();
+        this.isStopping = false;
+        // Validate configuration at startup (addresses issue 8.2)
+        // Skip validation for internally-generated configs to maintain backward compatibility
+        this.skipValidation = skipValidation;
+        this.config = skipValidation ? config : (0, config_1.validateMockServerConfig)(config);
         this.app = (0, express_1.default)();
-        this.parser = new schema_1.SchemaParser();
         // Set log level from config
-        if (config.server.logLevel) {
-            (0, logger_1.setLogLevel)(config.server.logLevel);
+        if (this.config.server.logLevel) {
+            (0, logger_1.setLogLevel)(this.config.server.logLevel);
         }
         this.setupMiddleware();
         this.setupRoutes();
     }
     setupMiddleware() {
-        // Enable CORS if configured
-        if (this.config.server.cors) {
-            this.app.use((0, cors_1.default)());
-            logger_1.log.debug('CORS enabled', { module: 'server' });
-        }
-        // JSON body parsing with size limit for security
-        this.app.use(express_1.default.json({ limit: '10mb' }));
-        // Add branding headers (unless disabled for paid users)
-        if (!this.config.server.hideBranding) {
-            this.app.use((req, res, next) => {
-                res.setHeader('X-Powered-By', `Schemock v${this.version}`);
-                next();
-            });
-            logger_1.log.debug('Branding enabled', { module: 'server' });
-        }
-        // Request logging middleware
-        this.app.use((req, res, next) => {
-            const startTime = Date.now();
-            // Log request
-            logger_1.log.debug(`Incoming request`, {
-                module: 'server',
-                method: req.method,
-                path: req.path,
-                query: req.query,
-                ip: req.ip
-            });
-            // Override res.json to capture status code and timing
-            const originalJson = res.json.bind(res);
-            res.json = function (body) {
-                const duration = Date.now() - startTime;
-                logger_1.log.request(req.method, req.path, res.statusCode, duration);
-                return originalJson(body);
-            };
-            next();
-        });
-        // Error handling middleware
-        this.app.use((err, req, res, next) => {
-            logger_1.log.error('Request error', {
-                module: 'server',
-                error: err,
-                method: req.method,
-                path: req.path
-            });
-            res.status(500).json({
-                error: 'Internal Server Error',
-                message: this.config.server.logLevel === 'debug' ? err.message : 'An error occurred'
-            });
+        (0, middleware_1.setupAllMiddleware)(this.app, {
+            cors: this.config.server.cors,
+            hideBranding: this.config.server.hideBranding,
+            logLevel: this.config.server.logLevel,
+            version: this.version
         });
     }
     setupRoutes() {
@@ -83,119 +46,8 @@ class ServerGenerator {
         Object.entries(this.config.routes).forEach(([_, routeConfig]) => {
             this.setupRoute(routeConfig);
         });
-        // API Index endpoint (Playground)
-        this.app.get('/', (req, res) => {
-            const html = (0, playground_1.getPlaygroundHTML)(this.config.routes);
-            res.send(html);
-        });
-        // Health check endpoint
-        this.app.get('/health', (req, res) => {
-            res.json({
-                status: 'healthy',
-                timestamp: new Date().toISOString(),
-                uptime: process.uptime()
-            });
-        });
-        // Share schema endpoint
-        this.app.get('/api/share', (req, res) => {
-            const shareData = {
-                routes: this.config.routes,
-                server: {
-                    port: this.config.server.port,
-                    cors: this.config.server.cors
-                },
-                version: this.version,
-                createdAt: new Date().toISOString()
-            };
-            res.json(shareData);
-        });
-        // Schema gallery endpoint (static list of public schemas)
-        this.app.get('/api/gallery', (req, res) => {
-            const publicSchemas = [
-                {
-                    id: 'ecommerce-product',
-                    title: 'E-commerce Product API',
-                    description: 'Complete product management API with categories, pricing, and inventory',
-                    url: 'https://github.com/toxzak-svg/schemock-app',
-                    schema: {
-                        type: 'object',
-                        title: 'Product',
-                        properties: {
-                            id: { type: 'string', format: 'uuid' },
-                            name: { type: 'string' },
-                            price: { type: 'number', minimum: 0 },
-                            category: { type: 'string', enum: ['electronics', 'clothing', 'books'] },
-                            inStock: { type: 'boolean' }
-                        },
-                        required: ['id', 'name', 'price', 'category']
-                    }
-                },
-                {
-                    id: 'social-media-post',
-                    title: 'Social Media Post Schema',
-                    description: 'Blog post and social media content API with likes and comments',
-                    url: 'https://github.com/toxzak-svg/schemock-app',
-                    schema: {
-                        type: 'object',
-                        title: 'Post',
-                        properties: {
-                            id: { type: 'string', format: 'uuid' },
-                            title: { type: 'string' },
-                            content: { type: 'string' },
-                            author: { type: 'string' },
-                            likes: { type: 'number' },
-                            comments: { type: 'array', items: { type: 'string' } }
-                        },
-                        required: ['id', 'title', 'content', 'author']
-                    }
-                },
-                {
-                    id: 'user-profile',
-                    title: 'User Profile API',
-                    description: 'User authentication and profile management',
-                    url: 'https://github.com/toxzak-svg/schemock-app',
-                    schema: {
-                        type: 'object',
-                        title: 'User',
-                        properties: {
-                            id: { type: 'string', format: 'uuid' },
-                            email: { type: 'string', format: 'email' },
-                            username: { type: 'string' },
-                            profile: {
-                                type: 'object',
-                                properties: {
-                                    firstName: { type: 'string' },
-                                    lastName: { type: 'string' },
-                                    avatar: { type: 'string', format: 'uri' }
-                                }
-                            }
-                        },
-                        required: ['id', 'email', 'username']
-                    }
-                }
-            ];
-            res.json({
-                schemas: publicSchemas,
-                total: publicSchemas.length,
-                message: 'Made with Schemock'
-            });
-        });
-        // Favicon handler (prevent 404 warnings)
-        this.app.get('/favicon.ico', (req, res) => {
-            res.status(204).end();
-        });
-        // 404 handler
-        this.app.use((req, res) => {
-            logger_1.log.warn('Route not found', {
-                module: 'server',
-                method: req.method,
-                path: req.path
-            });
-            res.status(404).json({
-                error: 'Not Found',
-                message: `No route found for ${req.method} ${req.path}`
-            });
-        });
+        // Setup system routes (playground, health, share, gallery, etc.)
+        (0, route_setup_1.setupSystemRoutes)(this.app, this.config, this.version);
     }
     setupRoute(routeConfig) {
         const { path, method, response, statusCode = 200, delay = 0, headers = {}, schema } = routeConfig;
@@ -264,14 +116,22 @@ class ServerGenerator {
                 // Handle different response types
                 if (typeof response === 'function') {
                     // If response is a function, call it with request and state
-                    const result = await Promise.resolve(response(req, this.state));
+                    const routeReq = {
+                        params: req.params,
+                        query: req.query,
+                        body: req.body,
+                        method: req.method,
+                        path: req.path,
+                        headers: req.headers
+                    };
+                    const result = await Promise.resolve(response(routeReq, this.state));
                     // Add branding metadata to response (unless disabled)
-                    const brandedResult = this.addBranding(result);
+                    const brandedResult = (0, response_utils_1.addBranding)(result, this.config.server.hideBranding ?? false, this.version);
                     res.status(statusCode).json(brandedResult);
                 }
                 else if (typeof response === 'object' && response !== null) {
                     // If response is an object, add branding metadata
-                    const brandedResponse = this.addBranding(response);
+                    const brandedResponse = (0, response_utils_1.addBranding)(response, this.config.server.hideBranding ?? false, this.version);
                     res.status(statusCode).json(brandedResponse);
                 }
                 else {
@@ -320,6 +180,7 @@ class ServerGenerator {
     async start() {
         return new Promise((resolve, reject) => {
             const port = this.config.server.port !== undefined ? this.config.server.port : 3000;
+            this.isStopping = false;
             this.server = this.app.listen(port, () => {
                 logger_1.log.info(`Mock server started`, {
                     module: 'server',
@@ -334,6 +195,22 @@ class ServerGenerator {
                     });
                 }
                 resolve();
+            });
+            // Track all connections for proper cleanup
+            this.server.on('connection', (socket) => {
+                if (this.isStopping) {
+                    // Reject new connections if we're stopping
+                    socket.destroy();
+                }
+                else {
+                    this.connections.add(socket);
+                    socket.on('close', () => {
+                        this.connections.delete(socket);
+                    });
+                    socket.on('error', () => {
+                        this.connections.delete(socket);
+                    });
+                }
             });
             this.server.on('error', (error) => {
                 if (error.code === 'EADDRINUSE') {
@@ -363,16 +240,85 @@ class ServerGenerator {
         if (!this.server) {
             return;
         }
+        this.isStopping = true;
         return new Promise((resolve, reject) => {
-            this.server.close((err) => {
-                if (err) {
-                    logger_1.log.error('Error stopping server', {
-                        module: 'server',
-                        error: err
+            const timeout = setTimeout(() => {
+                // Force close all connections if timeout is reached
+                logger_1.log.warn('Server stop timeout, forcing connections closed', {
+                    module: 'server'
+                });
+                this.connections.forEach(socket => {
+                    try {
+                        if (typeof socket === 'object' && socket !== null && 'destroy' in socket && typeof socket.destroy === 'function') {
+                            socket.destroy();
+                        }
+                    }
+                    catch (e) {
+                        // Ignore errors when destroying sockets
+                    }
+                });
+                this.connections.clear();
+                if (this.server) {
+                    this.server.close((err) => {
+                        const errno = err;
+                        if (err && errno.code !== 'ERR_SERVER_NOT_RUNNING') {
+                            logger_1.log.error('Error stopping server (forced)', {
+                                module: 'server',
+                                error: err
+                            });
+                        }
+                        this.server = null;
+                        logger_1.log.info('Server stopped (forced)', { module: 'server' });
+                        resolve();
                     });
-                    reject(new errors_1.ServerError('Failed to stop server', { originalError: err }));
                 }
                 else {
+                    this.server = null;
+                    resolve();
+                }
+            }, 5000); // 5 second timeout for graceful shutdown
+            this.server.close((err) => {
+                clearTimeout(timeout);
+                if (err) {
+                    const errno = err;
+                    if (errno.code === 'ERR_SERVER_NOT_RUNNING') {
+                        // Server already stopped, just clean up
+                        this.connections.forEach(socket => {
+                            try {
+                                if (typeof socket === 'object' && socket !== null && 'destroy' in socket && typeof socket.destroy === 'function') {
+                                    socket.destroy();
+                                }
+                            }
+                            catch (e) {
+                                // Ignore errors when destroying sockets
+                            }
+                        });
+                        this.connections.clear();
+                        this.server = null;
+                        logger_1.log.info('Server stopped (was not running)', { module: 'server' });
+                        resolve();
+                    }
+                    else {
+                        logger_1.log.error('Error stopping server', {
+                            module: 'server',
+                            error: err
+                        });
+                        reject(new errors_1.ServerError('Failed to stop server', { originalError: err }));
+                    }
+                }
+                else {
+                    // Close all remaining connections
+                    this.connections.forEach(socket => {
+                        try {
+                            if (typeof socket === 'object' && socket !== null && 'destroy' in socket && typeof socket.destroy === 'function') {
+                                socket.destroy();
+                            }
+                        }
+                        catch (e) {
+                            // Ignore errors when destroying sockets
+                        }
+                    });
+                    this.connections.clear();
                     this.server = null;
                     logger_1.log.info('Server stopped', { module: 'server' });
                     resolve();
@@ -385,11 +331,24 @@ class ServerGenerator {
      */
     async restart(newConfig) {
         logger_1.log.info('Restarting server', { module: 'server' });
-        await this.stop();
+        try {
+            await this.stop();
+        }
+        catch (error) {
+            // Log error but continue with restart
+            logger_1.log.warn('Error during server stop, continuing with restart', {
+                module: 'server',
+                error
+            });
+        }
+        // Small delay to ensure port is fully released
+        await new Promise(resolve => setTimeout(resolve, 100));
         if (newConfig) {
-            this.config = newConfig;
-            if (newConfig.server.logLevel) {
-                (0, logger_1.setLogLevel)(newConfig.server.logLevel);
+            // Validate new configuration before applying (addresses issue 8.2)
+            // Skip validation for internally-generated configs to maintain backward compatibility
+            this.config = this.skipValidation ? newConfig : (0, config_1.validateMockServerConfig)(newConfig);
+            if (this.config.server.logLevel) {
+                (0, logger_1.setLogLevel)(this.config.server.logLevel);
             }
             this.app = (0, express_1.default)();
             this.setupMiddleware();
@@ -412,187 +371,16 @@ class ServerGenerator {
     getConfig() {
         return this.config;
     }
-    /**
-     * Add branding metadata to response (unless disabled for paid users)
-     */
-    addBranding(data) {
-        // Skip branding if explicitly disabled
-        if (this.config.server.hideBranding) {
-            return data;
-        }
-        // Don't add metadata to non-objects or arrays
-        if (typeof data !== 'object' || data === null || Array.isArray(data)) {
-            return data;
-        }
-        // Check if _meta already exists in response
-        if ('_meta' in data) {
-            return data;
-        }
-        // Add branding metadata
-        return {
-            ...data,
-            _meta: {
-                generated_by: 'Schemock',
-                version: this.version,
-                url: 'https://github.com/toxzak-svg/schemock-app'
-            }
-        };
-    }
     static generateFromSchema(schema, options = { port: 3000 }) {
         const port = options.port !== undefined ? options.port : 3000;
-        const routes = {};
-        const resourceName = options.resourceName || (schema.title ? schema.title.toLowerCase() + (schema.title.toLowerCase().endsWith('s') ? '' : 's') : 'data');
-        const basePath = options.basePath || `/api/${resourceName}`;
+        const resourceName = (0, schema_routes_1.determineResourceName)(schema, options);
+        const basePath = (0, schema_routes_1.determineBasePath)(resourceName, options);
         const createHandler = (method, routePath, routeDef, wrap = true) => {
-            return (req, state) => {
-                const parts = routePath.split('/').filter(p => p && p !== 'api');
-                const resource = parts[0] || 'data';
-                if (!state[resource]) {
-                    state[resource] = [];
-                }
-                const isSchema = routeDef.response && typeof routeDef.response === 'object' &&
-                    (routeDef.response.type || routeDef.response.$ref || routeDef.response.oneOf ||
-                        routeDef.response.anyOf || routeDef.response.allOf);
-                const responseSchema = isSchema ? routeDef.response : schema;
-                if (method === 'get') {
-                    if (routePath.endsWith('/:id')) {
-                        const item = state[resource].find((i) => i.id === req.params.id);
-                        if (item) {
-                            return wrap ? {
-                                success: true,
-                                message: 'Mock data retrieved',
-                                timestamp: new Date().toISOString(),
-                                data: item
-                            } : item;
-                        }
-                        // Fallback: generate, tie to ID, and store in state for consistency
-                        let data = isSchema ? schema_1.SchemaParser.parse(responseSchema, schema, new Set(), options.strict, resource) : routeDef.response;
-                        if (data && typeof data === 'object' && !Array.isArray(data)) {
-                            // Clone to avoid mutating the original routeDef.response
-                            data = { ...data };
-                            data.id = req.params.id;
-                            state[resource].push(data);
-                        }
-                        return wrap ? {
-                            success: true,
-                            message: 'Mock data generated',
-                            timestamp: new Date().toISOString(),
-                            data
-                        } : data;
-                    }
-                    else {
-                        // Collection GET logic - only if it's a default route (wrap=true) or explicitly a schema array
-                        if (wrap || (isSchema && responseSchema.type === 'array')) {
-                            // Return list from state
-                            if (state[resource].length === 0) {
-                                // Populate with some initial data
-                                const generated = isSchema ? schema_1.SchemaParser.parse(responseSchema, schema, new Set(), options.strict, resource) : routeDef.response;
-                                if (Array.isArray(generated)) {
-                                    state[resource] = generated;
-                                }
-                                else if (isSchema) {
-                                    for (let i = 0; i < 3; i++) {
-                                        const item = schema_1.SchemaParser.parse(responseSchema, schema, new Set(), options.strict, resource);
-                                        if (item && typeof item === 'object' && !Array.isArray(item) && !item.id) {
-                                            item.id = (0, uuid_1.v4)();
-                                        }
-                                        state[resource].push(item);
-                                    }
-                                }
-                                else {
-                                    // Static non-array response, don't treat as collection
-                                    return routeDef.response;
-                                }
-                            }
-                            return wrap ? {
-                                success: true,
-                                message: 'Mock data retrieved',
-                                timestamp: new Date().toISOString(),
-                                data: state[resource],
-                                meta: { total: state[resource].length }
-                            } : state[resource];
-                        }
-                        else {
-                            // Static or non-wrapped GET
-                            if (isSchema)
-                                return schema_1.SchemaParser.parse(routeDef.response, schema, new Set(), options.strict, resource);
-                            return routeDef.response;
-                        }
-                    }
-                }
-                if (method === 'post') {
-                    const newItem = {
-                        id: req.body.id || (0, uuid_1.v4)(),
-                        ...req.body,
-                        createdAt: new Date().toISOString(),
-                        updatedAt: new Date().toISOString()
-                    };
-                    state[resource].push(newItem);
-                    return wrap ? { success: true, data: newItem, message: 'Created successfully' } : newItem;
-                }
-                if (method === 'put' && routePath.endsWith('/:id')) {
-                    const index = state[resource].findIndex((i) => i.id === req.params.id);
-                    const updatedItem = {
-                        ...(index >= 0 ? state[resource][index] : {}),
-                        ...req.body,
-                        id: req.params.id,
-                        updatedAt: new Date().toISOString()
-                    };
-                    if (index >= 0) {
-                        state[resource][index] = updatedItem;
-                    }
-                    else {
-                        state[resource].push(updatedItem);
-                    }
-                    return wrap ? { success: true, data: updatedItem } : updatedItem;
-                }
-                if (method === 'delete' && routePath.endsWith('/:id')) {
-                    const initialLength = state[resource].length;
-                    state[resource] = state[resource].filter((i) => i.id !== req.params.id);
-                    return wrap ? { success: true, message: 'Deleted successfully' } : { message: 'Deleted successfully' };
-                }
-                // Default behavior if not matched
-                if (isSchema)
-                    return schema_1.SchemaParser.parse(routeDef.response, schema, new Set(), options.strict, resource);
-                return routeDef.response || schema_1.SchemaParser.parse(schema, undefined, new Set(), options.strict, resource);
-            };
+            return (0, schema_routes_1.createRouteHandler)(method, routePath, routeDef, schema, options, wrap);
         };
-        if (schema['x-schemock-routes'] && Array.isArray(schema['x-schemock-routes'])) {
-            schema['x-schemock-routes'].forEach((routeDef) => {
-                const method = routeDef.method.toLowerCase();
-                const path = routeDef.path;
-                const key = `${method}:${path}`;
-                routes[key] = {
-                    path,
-                    method: method,
-                    statusCode: routeDef.statusCode || (method === 'post' ? 201 : 200),
-                    delay: routeDef.delay || 0,
-                    headers: routeDef.headers || {},
-                    response: createHandler(method, path, routeDef, false), // Don't wrap x-schemock-routes
-                    schema: routeDef.response
-                };
-            });
-        }
-        else {
-            // Default CRUD routes based on schema title
-            const crudPaths = [
-                { method: 'get', path: basePath },
-                { method: 'get', path: `${basePath}/:id` },
-                { method: 'post', path: basePath },
-                { method: 'put', path: `${basePath}/:id` },
-                { method: 'delete', path: `${basePath}/:id` }
-            ];
-            crudPaths.forEach(({ method, path }) => {
-                const key = `${method}:${path}`;
-                routes[key] = {
-                    path,
-                    method: method,
-                    statusCode: method === 'post' ? 201 : (method === 'delete' ? 204 : 200),
-                    response: createHandler(method, path, { response: schema }),
-                    schema: schema
-                };
-            });
-        }
+        const routes = schema['x-schemock-routes'] && Array.isArray(schema['x-schemock-routes'])
+            ? (0, schema_routes_1.generateCustomRoutes)(schema, createHandler)
+            : (0, schema_routes_1.generateCrudRoutes)(basePath, schema, createHandler);
         const config = {
             server: {
                 port,
@@ -602,7 +390,7 @@ class ServerGenerator {
             },
             routes
         };
-        return new ServerGenerator(config);
+        return new ServerGenerator(config, true);
     }
 }
 exports.ServerGenerator = ServerGenerator;

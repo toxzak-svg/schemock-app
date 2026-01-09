@@ -1,7 +1,7 @@
 import { ServerGenerator } from './generators/server';
 import { ServerOptions } from './types';
 /**
- * Main entry point for the Schemock application
+ * Main entry point for Schemock application
  * @param schema - The JSON schema to generate mock data from
  * @param options - Server configuration options
  * @returns ServerGenerator instance (not started)
@@ -14,3 +14,4 @@ export * from './errors';
 export * from './utils/validation';
 export * from './utils/watcher';
 export * from './integrations/vite';
+export * from './utils/config';

@@ -1,6 +1,6 @@
 import { Schema } from '../types';
 /**
- * Generate route handlers based on the provided schema
+ * Generate route handlers based on provided schema
  * @param schema - The JSON schema to generate routes for
  * @returns An object containing route configurations
  */

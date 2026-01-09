@@ -1,19 +1,39 @@
 import { ServerGenerator } from './generators/server';
 import { ServerOptions } from './types';
+import { validatePort, validateSchema } from './utils/validation';
 
 /**
- * Main entry point for the Schemock application
+ * Main entry point for Schemock application
+ *
+ * Creates a mock server instance from a JSON schema. The server is not started
+ * automatically; you must call the start() method on the returned instance.
+ *
  * @param schema - The JSON schema to generate mock data from
  * @param options - Server configuration options
- * @returns ServerGenerator instance (not started)
+ * @returns A ServerGenerator instance that has not been started yet
  */
 export function createMockServer(schema: any, options: ServerOptions = { port: 3000 }) {
+  // Validate schema if provided (addresses issue 10.1)
+  if (schema) {
+    try {
+      validateSchema(schema, options.strict || false);
+    } catch (error) {
+      // Log warning but continue - schema parser may still work
+      console.warn(`Schema validation warning: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  // Validate port (addresses issue 10.1)
+  if (options.port !== undefined) {
+    options.port = validatePort(options.port);
+  }
+
   return ServerGenerator.generateFromSchema(schema, options);
 }
 
 // If this file is run directly, start a simple mock server
 if (require.main === module) {
-  // Default schema for the demo
+  // Default schema for demo
   const defaultSchema = {
     type: 'object',
     properties: {
@@ -33,8 +53,9 @@ if (require.main === module) {
     required: ['id', 'name', 'email', 'isActive', 'createdAt']
   };
 
-  const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
-  const server = createMockServer(defaultSchema, { 
+  // Validate port from environment variable (addresses issue 10.1)
+  const port = process.env.PORT ? validatePort(process.env.PORT) : 3000;
+  const server = createMockServer(defaultSchema, {
     port,
     logLevel: 'info',
     cors: true
@@ -59,3 +80,4 @@ export * from './errors';
 export * from './utils/validation';
 export * from './utils/watcher';
 export * from './integrations/vite';
+export * from './utils/config';

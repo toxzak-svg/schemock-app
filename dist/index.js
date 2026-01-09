@@ -16,18 +16,33 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createMockServer = createMockServer;
 const server_1 = require("./generators/server");
+const validation_1 = require("./utils/validation");
 /**
- * Main entry point for the Schemock application
+ * Main entry point for Schemock application
  * @param schema - The JSON schema to generate mock data from
  * @param options - Server configuration options
  * @returns ServerGenerator instance (not started)
  */
 function createMockServer(schema, options = { port: 3000 }) {
+    // Validate schema if provided (addresses issue 10.1)
+    if (schema) {
+        try {
+            (0, validation_1.validateSchema)(schema, options.strict || false);
+        }
+        catch (error) {
+            // Log warning but continue - schema parser may still work
+            console.warn(`Schema validation warning: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    }
+    // Validate port (addresses issue 10.1)
+    if (options.port !== undefined) {
+        options.port = (0, validation_1.validatePort)(options.port);
+    }
     return server_1.ServerGenerator.generateFromSchema(schema, options);
 }
 // If this file is run directly, start a simple mock server
 if (require.main === module) {
-    // Default schema for the demo
+    // Default schema for demo
     const defaultSchema = {
         type: 'object',
         properties: {
@@ -46,7 +61,8 @@ if (require.main === module) {
         },
         required: ['id', 'name', 'email', 'isActive', 'createdAt']
     };
-    const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+    // Validate port from environment variable (addresses issue 10.1)
+    const port = process.env.PORT ? (0, validation_1.validatePort)(process.env.PORT) : 3000;
     const server = createMockServer(defaultSchema, {
         port,
         logLevel: 'info',
@@ -69,4 +85,5 @@ __exportStar(require("./errors"), exports);
 __exportStar(require("./utils/validation"), exports);
 __exportStar(require("./utils/watcher"), exports);
 __exportStar(require("./integrations/vite"), exports);
+__exportStar(require("./utils/config"), exports);
 //# sourceMappingURL=index.js.map

@@ -18,7 +18,11 @@ import {
 } from './constants';
 
 /**
- * Validate and sanitize a port number
+ * Validates and sanitizes a port number
+ *
+ * @param port - The port number to validate (string or number)
+ * @returns The validated port as an integer
+ * @throws {ValidationError} When the port is invalid
  */
 export function validatePort(port: string | number): number {
   // Reject non-numeric types
@@ -58,7 +62,15 @@ export function validatePort(port: string | number): number {
 }
 
 /**
- * Validate and sanitize a file path to prevent directory traversal
+ * Validates and sanitizes a file path to prevent directory traversal attacks
+ *
+ * Checks for dangerous patterns, executable extensions, and ensures the path
+ * is within the allowed base directory if specified.
+ *
+ * @param filePath - The file path to validate
+ * @param baseDir - Optional base directory to restrict the path to
+ * @returns The normalized absolute file path
+ * @throws {ValidationError} When the path is invalid or contains dangerous patterns
  */
 export function validateFilePath(filePath: string, baseDir?: string): string {
   if (!filePath || typeof filePath !== 'string') {
@@ -121,7 +133,10 @@ export function validateFilePath(filePath: string, baseDir?: string): string {
 }
 
 /**
- * Validate that a file exists and is readable
+ * Validates that a file exists and is readable
+ *
+ * @param filePath - The absolute path to the file
+ * @throws {FileError} When the file does not exist
  */
 export function validateFileExists(filePath: string): void {
   if (!existsSync(filePath)) {
@@ -130,7 +145,14 @@ export function validateFileExists(filePath: string): void {
 }
 
 /**
- * Validate JSON Schema structure
+ * Validates a JSON Schema structure
+ *
+ * Checks that the schema is a valid object with appropriate type or composition
+ * keywords. In strict mode, enforces additional validation rules.
+ *
+ * @param schema - The JSON Schema to validate
+ * @param strict - Whether to apply strict validation rules
+ * @throws {ValidationError} When the schema structure is invalid
  */
 export function validateSchema(schema: any, strict: boolean = false): void {
   if (!schema || typeof schema !== 'object' || Array.isArray(schema)) {
@@ -205,7 +227,14 @@ export function validateSchema(schema: any, strict: boolean = false): void {
 }
 
 /**
- * Validate data against a JSON Schema
+ * Validates data against a JSON Schema
+ *
+ * Performs type checking, constraint validation, and recursive validation
+ * for nested objects and arrays.
+ *
+ * @param data - The data to validate
+ * @param schema - The JSON Schema to validate against
+ * @throws {ValidationError} When the data does not match the schema
  */
 export function validateData(data: any, schema: any): void {
   if (!schema) return;
@@ -324,7 +353,11 @@ export function validateData(data: any, schema: any): void {
 }
 
 /**
- * Validate log level
+ * Validates a log level string
+ *
+ * @param level - The log level to validate
+ * @returns The validated log level
+ * @throws {ValidationError} When the log level is invalid
  */
 export function validateLogLevel(level: string): 'error' | 'warn' | 'info' | 'debug' {
   const validLevels = ['error', 'warn', 'info', 'debug'] as const;
@@ -341,7 +374,15 @@ export function validateLogLevel(level: string): 'error' | 'warn' | 'info' | 'de
 }
 
 /**
- * Sanitize string input to prevent injection
+ * Sanitizes a string input to prevent injection attacks
+ *
+ * Removes control characters and shell injection characters, and limits
+ * the length to prevent denial of service attacks.
+ *
+ * @param input - The string to sanitize
+ * @param maxLength - Maximum allowed length for the string
+ * @returns The sanitized string
+ * @throws {ValidationError} When the input is not a string or exceeds max length
  */
 export function sanitizeString(input: string, maxLength: number = DEFAULT_MAX_LOG_LENGTH): string {
   if (typeof input !== 'string') {
@@ -367,7 +408,14 @@ export function sanitizeString(input: string, maxLength: number = DEFAULT_MAX_LO
 }
 
 /**
- * Validate project name for init command
+ * Validates a project name for the init command
+ *
+ * Ensures the name follows npm package naming conventions and is not
+ * a reserved name.
+ *
+ * @param name - The project name to validate
+ * @returns The sanitized project name
+ * @throws {ValidationError} When the project name is invalid or reserved
  */
 export function validateProjectName(name: string): string {
   const sanitized = sanitizeString(name, MAX_PROJECT_NAME_LENGTH);

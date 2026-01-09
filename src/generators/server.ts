@@ -12,6 +12,7 @@ import {
 import { PortError, ServerError, ValidationError } from '../errors';
 import { log, setLogLevel } from '../utils/logger';
 import { validateData } from '../utils/validation';
+import { validateMockServerConfig, createConfig } from '../utils/config';
 import { setupAllMiddleware } from './middleware';
 import { setupSystemRoutes } from './route-setup';
 import { addBranding } from './response-utils';
@@ -23,6 +24,13 @@ import {
   generateCrudRoutes
 } from './schema-routes';
 
+/**
+ * A mock server generator that creates and manages an Express server with configurable routes.
+ *
+ * This class provides functionality to start, stop, restart, and manage a mock API server
+ * based on JSON Schema configurations. It supports custom routes, CRUD operations, response
+ * delays, error scenarios, and request validation.
+ */
 export class ServerGenerator {
   private app: Application;
   private config: MockServerConfig;
@@ -31,20 +39,36 @@ export class ServerGenerator {
   private version = require('../../package.json').version;
   private connections: Set<unknown> = new Set();
   private isStopping = false;
+  private skipValidation: boolean;
 
-  constructor(config: MockServerConfig) {
-    this.config = config;
+  /**
+   * Creates a new ServerGenerator instance.
+   *
+   * @param config - The mock server configuration containing server settings and route definitions
+   * @param skipValidation - If true, skips configuration validation (for internal use only)
+   * @throws {ValidationError} When configuration validation fails and skipValidation is false
+   */
+  constructor(config: MockServerConfig, skipValidation: boolean = false) {
+    // Validate configuration at startup (addresses issue 8.2)
+    // Skip validation for internally-generated configs to maintain backward compatibility
+    this.skipValidation = skipValidation;
+    this.config = skipValidation ? config : validateMockServerConfig(config);
     this.app = express();
 
     // Set log level from config
-    if (config.server.logLevel) {
-      setLogLevel(config.server.logLevel);
+    if (this.config.server.logLevel) {
+      setLogLevel(this.config.server.logLevel);
     }
 
     this.setupMiddleware();
     this.setupRoutes();
   }
 
+  /**
+   * Configures and applies all middleware to the Express application.
+   *
+   * Sets up CORS, request parsing, logging, and other middleware based on configuration.
+   */
   private setupMiddleware(): void {
     setupAllMiddleware(this.app, {
       cors: this.config.server.cors,
@@ -54,6 +78,12 @@ export class ServerGenerator {
     });
   }
 
+  /**
+   * Configures all routes on the Express application.
+   *
+   * Iterates through route configurations and sets up system routes like
+   * playground, health check, and gallery.
+   */
   private setupRoutes(): void {
     // Setup each route from the config
     Object.entries(this.config.routes).forEach(([_, routeConfig]) => {
@@ -64,6 +94,12 @@ export class ServerGenerator {
     setupSystemRoutes(this.app, this.config, this.version);
   }
 
+  /**
+   * Configures a single route on the Express application.
+   *
+   * @param routeConfig - The route configuration including path, method, response, and options
+   * @throws {ServerError} When an unsupported HTTP method is specified
+   */
   private setupRoute(routeConfig: RouteConfig): void {
     const { path, method, response, statusCode = 200, delay = 0, headers = {}, schema } = routeConfig;
 
@@ -200,6 +236,16 @@ export class ServerGenerator {
     });
   }
 
+  /**
+   * Starts the mock server on the configured port.
+   *
+   * Begins listening for HTTP requests and tracks all active connections for proper cleanup.
+   * Logs available routes in debug mode.
+   *
+   * @throws {PortError} When the configured port is already in use
+   * @throws {ServerError} When the server fails to start for other reasons
+   * @returns Promise that resolves when the server is successfully started
+   */
   public async start(): Promise<void> {
     return new Promise((resolve, reject) => {
       const port = this.config.server.port !== undefined ? this.config.server.port : 3000;
@@ -266,7 +312,13 @@ export class ServerGenerator {
   }
 
   /**
-   * Stop the server gracefully
+   * Stops the server gracefully, allowing existing connections to complete.
+   *
+   * Waits up to 5 seconds for connections to close before forcing them shut.
+   * If the server is not running, returns immediately.
+   *
+   * @throws {ServerError} When an error occurs while stopping the server
+   * @returns Promise that resolves when the server is stopped
    */
   public async stop(): Promise<void> {
     if (!this.server) {
@@ -360,7 +412,14 @@ export class ServerGenerator {
   }
 
   /**
-   * Restart the server with new configuration
+   * Restarts the server with optional new configuration.
+   *
+   * Stops the current server, applies new configuration if provided, and starts again.
+   * Includes a small delay to ensure the port is fully released.
+   *
+   * @param newConfig - Optional new configuration to apply (uses current config if not provided)
+   * @throws {ServerError} When the server fails to restart
+   * @returns Promise that resolves when the server is successfully restarted
    */
   public async restart(newConfig?: MockServerConfig): Promise<void> {
     log.info('Restarting server', { module: 'server' });
@@ -379,9 +438,11 @@ export class ServerGenerator {
     await new Promise(resolve => setTimeout(resolve, 100));
 
     if (newConfig) {
-      this.config = newConfig;
-      if (newConfig.server.logLevel) {
-        setLogLevel(newConfig.server.logLevel);
+      // Validate new configuration before applying (addresses issue 8.2)
+      // Skip validation for internally-generated configs to maintain backward compatibility
+      this.config = this.skipValidation ? newConfig : validateMockServerConfig(newConfig);
+      if (this.config.server.logLevel) {
+        setLogLevel(this.config.server.logLevel);
       }
       this.app = express();
       this.setupMiddleware();
@@ -392,24 +453,43 @@ export class ServerGenerator {
   }
 
   /**
-   * Check if server is running
+   * Checks if the server is currently running and listening for connections.
+   *
+   * @returns True if the server is running, false otherwise
    */
   public isRunning(): boolean {
     return this.server !== null && this.server.listening;
   }
 
+  /**
+   * Gets the underlying Express Application instance.
+   *
+   * @returns The Express Application instance
+   */
   public getApp(): Application {
     return this.app;
   }
 
   /**
-   * Get current server configuration
+   * Gets the current server configuration.
+   *
+   * @returns The current mock server configuration
    */
   public getConfig(): MockServerConfig {
     return this.config;
   }
 
-  public static generateFromSchema(schema: Schema, options: Omit<ServerOptions, 'port'> & { port?: number } = { port: 3000 }): ServerGenerator {
+  /**
+   * Generates a mock server instance from a JSON Schema definition.
+   *
+   * Creates CRUD routes or custom routes based on the schema's x-schemock-routes extension.
+   * Automatically determines resource names and base paths from the schema.
+   *
+   * @param schema - The JSON Schema definition to generate routes from
+   * @param options - Optional server configuration options (defaults to port 3000)
+   * @returns A new ServerGenerator instance configured with routes from the schema
+   */
+  public static generateFromSchema(schema: Schema, options: Partial<ServerOptions> = { port: 3000 }): ServerGenerator {
     const port = options.port !== undefined ? options.port : 3000;
 
     const resourceName = determineResourceName(schema, options);
@@ -433,10 +513,20 @@ export class ServerGenerator {
       routes
     };
 
-    return new ServerGenerator(config);
+    return new ServerGenerator(config, true);
   }
 }
 
+/**
+ * Creates a new mock server instance with the specified configuration.
+ *
+ * This is a convenience function that creates a ServerGenerator instance
+ * with the provided configuration.
+ *
+ * @param config - The mock server configuration containing server settings and route definitions
+ * @returns A new ServerGenerator instance
+ * @throws {ValidationError} When configuration validation fails
+ */
 export function createMockServer(config: MockServerConfig): ServerGenerator {
   return new ServerGenerator(config);
 }

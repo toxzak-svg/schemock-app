@@ -1,13 +1,15 @@
 import { Application } from 'express';
-import { ServerOptions, MockServerConfig } from '../types';
+import { ServerOptions, MockServerConfig, Schema } from '../types';
 export declare class ServerGenerator {
     private app;
     private config;
-    private parser;
     private server;
     private state;
     private version;
-    constructor(config: MockServerConfig);
+    private connections;
+    private isStopping;
+    private skipValidation;
+    constructor(config: MockServerConfig, skipValidation?: boolean);
     private setupMiddleware;
     private setupRoutes;
     private setupRoute;
@@ -29,12 +31,6 @@ export declare class ServerGenerator {
      * Get current server configuration
      */
     getConfig(): MockServerConfig;
-    /**
-     * Add branding metadata to response (unless disabled for paid users)
-     */
-    private addBranding;
-    static generateFromSchema(schema: any, options?: Omit<ServerOptions, 'port'> & {
-        port?: number;
-    }): ServerGenerator;
+    static generateFromSchema(schema: Schema, options?: Partial<ServerOptions>): ServerGenerator;
 }
 export declare function createMockServer(config: MockServerConfig): ServerGenerator;

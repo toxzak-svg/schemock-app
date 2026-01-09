@@ -5,12 +5,15 @@ import {
     RouteRequest,
     ServerState,
     JSONValue,
-    Schema,
-    ServerOptions
+    Schema
 } from '../types';
 
 /**
- * Determine resource name from schema or options
+ * Determines the resource name from schema title or options
+ *
+ * @param schema - The JSON Schema to extract the resource name from
+ * @param options - Options containing an optional explicit resource name
+ * @returns The resource name to use for API routes
  */
 export function determineResourceName(schema: Schema, options: { resourceName?: string }): string {
     if (options.resourceName) {
@@ -24,14 +27,21 @@ export function determineResourceName(schema: Schema, options: { resourceName?: 
 }
 
 /**
- * Determine base path from resource name or options
+ * Determines the base API path for routes
+ *
+ * @param resourceName - The resource name to use in the path
+ * @param options - Options containing an optional explicit base path
+ * @returns The base path for API routes (e.g., /api/users)
  */
 export function determineBasePath(resourceName: string, options: { basePath?: string }): string {
     return options.basePath || `/api/${resourceName}`;
 }
 
 /**
- * Check if a response definition is a schema
+ * Type guard to check if a response definition is a Schema
+ *
+ * @param response - The response value to check
+ * @returns True if the response is a Schema object
  */
 function isSchemaResponse(response: JSONValue | Schema): response is Schema {
     return typeof response === 'object' && response !== null &&
@@ -40,7 +50,10 @@ function isSchemaResponse(response: JSONValue | Schema): response is Schema {
 }
 
 /**
- * Initialize resource state if not exists
+ * Initializes the resource state array if it doesn't exist
+ *
+ * @param state - The server state object to update
+ * @param resource - The resource key to initialize
  */
 function initializeResourceState(state: ServerState, resource: string): void {
     if (!state[resource]) {
@@ -49,7 +62,16 @@ function initializeResourceState(state: ServerState, resource: string): void {
 }
 
 /**
- * Handle GET request for single item by ID
+ * Handles GET request for a single item by ID
+ *
+ * @param state - The server state containing stored resources
+ * @param resource - The resource name to retrieve from
+ * @param req - The route request object containing params
+ * @param responseSchema - The schema for generating mock data
+ * @param mainSchema - The main schema for reference
+ * @param options - Options including strict mode flag
+ * @param wrap - Whether to wrap the response in a success envelope
+ * @returns The requested item or a generated mock item
  */
 function handleGetById(
     state: ServerState,
@@ -91,7 +113,15 @@ function handleGetById(
 }
 
 /**
- * Handle GET request for collection
+ * Handles GET request for a collection of items
+ *
+ * @param state - The server state containing stored resources
+ * @param resource - The resource name to retrieve from
+ * @param responseSchema - The schema for generating mock data
+ * @param mainSchema - The main schema for reference
+ * @param options - Options including strict mode flag
+ * @param wrap - Whether to wrap the response in a success envelope
+ * @returns The collection of items with optional metadata
  */
 function handleGetCollection(
     state: ServerState,
@@ -131,7 +161,13 @@ function handleGetCollection(
 }
 
 /**
- * Handle POST request (create)
+ * Handles POST request to create a new item
+ *
+ * @param state - The server state containing stored resources
+ * @param resource - The resource name to add to
+ * @param req - The route request object containing the body
+ * @param wrap - Whether to wrap the response in a success envelope
+ * @returns The created item with generated ID and timestamps
  */
 function handlePost(
     state: ServerState,
@@ -152,7 +188,13 @@ function handlePost(
 }
 
 /**
- * Handle PUT request (update)
+ * Handles PUT request to update an existing item
+ *
+ * @param state - The server state containing stored resources
+ * @param resource - The resource name to update in
+ * @param req - The route request object containing params and body
+ * @param wrap - Whether to wrap the response in a success envelope
+ * @returns The updated item
  */
 function handlePut(
     state: ServerState,
@@ -186,7 +228,13 @@ function handlePut(
 }
 
 /**
- * Handle DELETE request
+ * Handles DELETE request to remove an item
+ *
+ * @param state - The server state containing stored resources
+ * @param resource - The resource name to delete from
+ * @param req - The route request object containing params
+ * @param wrap - Whether to wrap the response in a success envelope
+ * @returns A success message
  */
 function handleDelete(
     state: ServerState,
@@ -202,7 +250,15 @@ function handleDelete(
 }
 
 /**
- * Create a route handler for a specific method and path
+ * Creates a route handler function for a specific method and path
+ *
+ * @param method - The HTTP method (get, post, put, delete, patch)
+ * @param routePath - The route path
+ * @param routeDef - The route definition containing response schema
+ * @param mainSchema - The main schema for reference
+ * @param options - Options including strict mode flag
+ * @param wrap - Whether to wrap responses in a success envelope
+ * @returns A route handler function
  */
 export function createRouteHandler(
     method: string,
@@ -259,7 +315,11 @@ export function createRouteHandler(
 }
 
 /**
- * Generate routes from x-schemock-routes extension
+ * Generates custom routes from the x-schemock-routes schema extension
+ *
+ * @param schema - The JSON Schema containing x-schemock-routes definitions
+ * @param createHandler - Factory function to create route handlers
+ * @returns A record of route configurations keyed by method:path
  */
 export function generateCustomRoutes(
     schema: Schema,
@@ -300,7 +360,15 @@ export function generateCustomRoutes(
 }
 
 /**
- * Generate default CRUD routes
+ * Generates default CRUD routes for a resource
+ *
+ * Creates GET (collection), GET (by ID), POST, PUT, and DELETE routes
+ * for the specified base path.
+ *
+ * @param basePath - The base path for the resource (e.g., /api/users)
+ * @param schema - The JSON Schema for the resource
+ * @param createHandler - Factory function to create route handlers
+ * @returns A record of route configurations keyed by method:path
  */
 export function generateCrudRoutes(
     basePath: string,

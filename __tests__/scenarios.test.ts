@@ -56,16 +56,21 @@ describe('Preset Scenarios', () => {
     port = (generator as any).server.address().port;
 
     let hasError = false;
+    let errorCount = 0;
     // Make up to 20 requests to catch at least one error (30% chance)
     for (let i = 0; i < 20; i++) {
       const response = await fetch(`http://localhost:${port}/api/tests`);
       if (response.status >= 400) {
         hasError = true;
+        errorCount++;
         const data = await response.json() as any;
         expect(data.error).toBe('ScenarioError');
         break;
       }
     }
+
+    // Diagnostic logging for flakiness
+    console.log(`[DIAGNOSTIC] error-heavy scenario: Made 20 requests, found ${errorCount} errors, hasError=${hasError}`);
 
     expect(hasError).toBe(true);
   });
@@ -77,6 +82,8 @@ describe('Preset Scenarios', () => {
 
     let hasError = false;
     let hasDelay = false;
+    let errorCount = 0;
+    let delayCount = 0;
 
     for (let i = 0; i < 15; i++) {
       const start = Date.now();
@@ -85,14 +92,19 @@ describe('Preset Scenarios', () => {
 
       if (duration >= 1000) {
         hasDelay = true;
+        delayCount++;
       }
 
       if (response.status >= 400) {
         hasError = true;
+        errorCount++;
       }
 
       if (hasError && hasDelay) break;
     }
+
+    // Diagnostic logging for flakiness
+    console.log(`[DIAGNOSTIC] sad-path scenario: Made 15 requests, found ${errorCount} errors, ${delayCount} delays, hasError=${hasError}, hasDelay=${hasDelay}`);
 
     expect(hasError).toBe(true);
     expect(hasDelay).toBe(true);

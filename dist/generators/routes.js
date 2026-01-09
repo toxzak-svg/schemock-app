@@ -3,14 +3,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateRouteConfigs = generateRouteConfigs;
 exports.generateRoutes = generateRoutes;
 exports.generateCRUDDSL = generateCRUDDSL;
+const pluralization_1 = require("../utils/pluralization");
 /**
- * Generate route handlers based on the provided schema
+ * Generate route handlers based on provided schema
  * @param schema - The JSON schema to generate routes for
  * @returns An object containing route configurations
  */
 function generateRouteConfigs(schema) {
     const resourceName = schema.title?.toLowerCase() || 'items';
-    const resourceNamePlural = `${resourceName}s`;
+    const resourceNamePlural = (0, pluralization_1.smartPluralize)(resourceName);
     return {
         // GET all items
         [`get:/api/${resourceNamePlural}`]: {
@@ -85,11 +86,12 @@ function generateRouteConfigs(schema) {
 // For backward compatibility
 function generateRoutes(schema) {
     const resourceName = schema.title?.toLowerCase() || 'items';
-    const resourceNamePlural = `${resourceName}s`;
+    const resourceNamePlural = (0, pluralization_1.smartPluralize)(resourceName);
     return `const express = require('express');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
 
+// Base path: /api/${resourceNamePlural}
 // In-memory database
 let db = [];
 
@@ -183,7 +185,7 @@ module.exports = router;`;
  * @returns Array of route definitions
  */
 function generateCRUDDSL(resourceName) {
-    const resourceNamePlural = `${resourceName.toLowerCase()}s`;
+    const resourceNamePlural = (0, pluralization_1.smartPluralize)(resourceName);
     return [
         {
             path: `/api/${resourceNamePlural}`,
