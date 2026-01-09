@@ -22,7 +22,7 @@
     "clean": "node -e \"const fs=require('fs');['dist','releases','coverage'].forEach(d=>{if(fs.existsSync(d))fs.rmSync(d,{recursive:true,force:true,maxRetries:5,retryDelay:200})})\"",
     "clean:force": "powershell -ExecutionPolicy Bypass -File clean-build.ps1 -Force",
     "verify:checksums": "node scripts/verify-checksums.js",
-    "prepare": "husky install",
+    "prepare": "husky",
     "lint": "eslint . --ext .ts,.js",
     "lint:fix": "eslint . --ext .ts,.js --fix",
     "format": "prettier --write \"src/**/*.ts\"",
