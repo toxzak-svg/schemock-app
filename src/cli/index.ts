@@ -30,7 +30,7 @@ program
 program
   .command('start [schemaPath]')
   .description('Start a mock server with the provided schema')
-  .option('-p, --port <number>', 'Port to run the server on', '3000')
+  .option('-p, --port <number>', 'Port to run the server on (defaults to PORT env var or 3000)')
   .option('--no-cors', 'Disable CORS')
   .option('--log-level <level>', 'Log level (error, warn, info, debug)', 'info')
   .option('-w, --watch', 'Watch schema file for changes and auto-reload')
@@ -42,7 +42,7 @@ program
       // Set log level first
       const logLevel = validateLogLevel(options.logLevel);
       setLogLevel(logLevel);
-      
+
       const scenario = options.scenario;
       if (scenario && !['happy-path', 'slow', 'error-heavy', 'sad-path'].includes(scenario)) {
         console.error(chalk.red(`❌ Invalid scenario: ${scenario}. Use happy-path, slow, error-heavy, or sad-path.`));
@@ -72,11 +72,11 @@ program
         try {
           const absolutePath = validateFilePath(schemaPath);
           validateFileExists(absolutePath);
-          
+
           const fileContent = readFileSync(absolutePath, 'utf-8');
           schema = JSON.parse(fileContent);
           validateSchema(schema, strict);
-          
+
           log.info('Schema loaded successfully', {
             module: 'cli',
             schemaPath: absolutePath
@@ -95,10 +95,11 @@ program
         log.info('Using default schema', { module: 'cli' });
       }
 
-      // Validate options
-      const port = validatePort(options.port);
+      // Validate options - support Railway's PORT environment variable
+      const portValue = options.port || process.env.PORT || '3000';
+      const port = validatePort(portValue);
       const watchMode = options.watch || false;
-      
+
       // Derive resource name from filename if not provided
       let resourceName = undefined;
       if (schemaPath) {
@@ -137,19 +138,19 @@ program
       if (watchMode && schemaPath) {
         const watcher = new SchemaWatcher();
         const absolutePath = validateFilePath(schemaPath);
-        
+
         watcher.on('change', async (changedPath: string) => {
           try {
             log.info('Reloading schema', {
               module: 'cli',
               schemaPath: changedPath
             });
-            
+
             // Read and validate new schema
             const newContent = readFileSync(changedPath, 'utf-8');
             const newSchema = JSON.parse(newContent);
             validateSchema(newSchema);
-            
+
             // Create new server config
             const newServerConfig = createMockServer(newSchema, {
               port,
@@ -157,10 +158,10 @@ program
               logLevel,
               scenario
             }).getConfig();
-            
+
             // Restart server with new configuration
             await server.restart(newServerConfig);
-            
+
             console.log(chalk.green(`✅ Server reloaded successfully`));
           } catch (error: unknown) {
             const message = error instanceof Error ? formatError(error) : 'Unknown error occurred';
@@ -214,13 +215,13 @@ program
     try {
       const absolutePath = validateFilePath(schemaPath);
       validateFileExists(absolutePath);
-      
+
       const fileContent = readFileSync(absolutePath, 'utf-8');
       const schema = JSON.parse(fileContent);
       const strict = options.strict || false;
-      
+
       console.log(chalk.blue(`🔍 Validating schema: ${absolutePath}...`));
-      
+
       try {
         validateSchema(schema, strict);
         // If it passes basic validation, do more thorough checks if strict
@@ -238,7 +239,7 @@ program
           if (error.details && error.details.field) {
             console.error(chalk.red(`   Field: ${error.details.field}`));
           }
-          
+
           // Try to find line number in fileContent
           if (error.details && error.details.field) {
             const field = error.details.field.split('.').pop();
@@ -273,9 +274,9 @@ program
       // Validate project name
       const projectName = validateProjectName(options.name);
       const port = validatePort(options.port);
-      
+
       const projectDir = resolve(process.cwd(), directory);
-      
+
       // Create project directory if it doesn't exist
       if (!existsSync(projectDir)) {
         mkdirSync(projectDir, { recursive: true });
@@ -429,9 +430,9 @@ program
       const port = validatePort(options.port || '3001');
 
       // Check if it's a Vite project
-      const hasVite = existsSync(join(projectDir, 'vite.config.ts')) || 
-                      existsSync(join(projectDir, 'vite.config.js'));
-      
+      const hasVite = existsSync(join(projectDir, 'vite.config.ts')) ||
+        existsSync(join(projectDir, 'vite.config.js'));
+
       if (!hasVite) {
         console.warn(chalk.yellow('⚠️ No vite.config.ts or vite.config.js found in the current directory.'));
         console.warn(chalk.yellow('Continuing anyway, but you might need to configure Vite manually.'));
@@ -475,12 +476,12 @@ program
         const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
         packageJson.scripts = packageJson.scripts || {};
         packageJson.scripts['mock'] = 'schemock start mocks/api.json --watch';
-        
+
         // Suggest updating dev script
         if (packageJson.scripts['dev'] && !packageJson.scripts['dev'].includes('mock')) {
-           console.log(chalk.blue('\n💡 Suggestion: Update your "dev" script in package.json to run the mock server alongside Vite:'));
-           console.log(chalk.cyan(`   "dev": "concurrently \\"npm run mock\\" \\"vite\\""`));
-           console.log(chalk.gray('   (requires `concurrently` package)'));
+          console.log(chalk.blue('\n💡 Suggestion: Update your "dev" script in package.json to run the mock server alongside Vite:'));
+          console.log(chalk.cyan(`   "dev": "concurrently \\"npm run mock\\" \\"vite\\""`));
+          console.log(chalk.gray('   (requires `concurrently` package)'));
         }
 
         writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
@@ -525,7 +526,7 @@ program
     try {
       const resourceName = resource.charAt(0).toUpperCase() + resource.slice(1);
       const routes = generateCRUDDSL(resourceName);
-      
+
       const schema = {
         $schema: 'http://json-schema.org/draft-07/schema#',
         title: `${resourceName} API`,
@@ -544,10 +545,10 @@ program
           }
         }
       };
-      
+
       const outputFile = options.output || `${resource.toLowerCase()}-crud.json`;
       writeFileSync(outputFile, JSON.stringify(schema, null, 2));
-      
+
       console.log(chalk.green(`✅ CRUD schema for ${resourceName} generated in ${outputFile}`));
       console.log(chalk.blue(`👉 Start with: schemock start ${outputFile}`));
     } catch (error: unknown) {
@@ -589,9 +590,9 @@ program
       const port = validatePort(options.port);
       console.log(chalk.blue(`🚀 Launching installer UI...`));
       const server = startInstallerServer(port);
-      
+
       // Keep the process running
-      await new Promise(() => {}); // Never resolves, keeps process alive
+      await new Promise(() => { }); // Never resolves, keeps process alive
     } catch (error: unknown) {
       const message = error instanceof Error ? formatError(error) : 'Unknown error occurred';
       console.error(chalk.red('❌ Error launching installer:'));

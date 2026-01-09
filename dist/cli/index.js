@@ -24,7 +24,7 @@ program
 program
     .command('start [schemaPath]')
     .description('Start a mock server with the provided schema')
-    .option('-p, --port <number>', 'Port to run the server on', '3000')
+    .option('-p, --port <number>', 'Port to run the server on (defaults to PORT env var or 3000)')
     .option('--no-cors', 'Disable CORS')
     .option('--log-level <level>', 'Log level (error, warn, info, debug)', 'info')
     .option('-w, --watch', 'Watch schema file for changes and auto-reload')
@@ -79,8 +79,9 @@ program
         else {
             logger_1.log.info('Using default schema', { module: 'cli' });
         }
-        // Validate options
-        const port = (0, validation_1.validatePort)(options.port);
+        // Validate options - support Railway's PORT environment variable
+        const portValue = options.port || process.env.PORT || '3000';
+        const port = (0, validation_1.validatePort)(portValue);
         const watchMode = options.watch || false;
         // Derive resource name from filename if not provided
         let resourceName = undefined;

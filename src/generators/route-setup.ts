@@ -21,13 +21,21 @@ export function setupPlaygroundRoute(app: Application, routes: Record<string, Ro
 
 /**
  * Setup health check endpoint
+ * Used by Railway and other platforms for health checks and monitoring
  */
-export function setupHealthCheckRoute(app: Application): void {
+export function setupHealthCheckRoute(app: Application, version?: string): void {
     app.get('/health', (req: Request, res: Response) => {
         res.json({
             status: 'healthy',
             timestamp: new Date().toISOString(),
-            uptime: process.uptime()
+            uptime: process.uptime(),
+            version: version || 'unknown',
+            env: process.env.NODE_ENV || 'development',
+            node: process.version,
+            memory: {
+                heapUsed: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+                heapTotal: Math.round(process.memoryUsage().heapTotal / 1024 / 1024)
+            }
         });
     });
 }
@@ -159,7 +167,7 @@ export function setupNotFoundRoute(app: Application): void {
  */
 export function setupSystemRoutes(app: Application, config: MockServerConfig, version: string): void {
     setupPlaygroundRoute(app, config.routes);
-    setupHealthCheckRoute(app);
+    setupHealthCheckRoute(app, version);
     setupShareRoute(app, config, version);
     setupGalleryRoute(app, version);
     setupFaviconRoute(app);

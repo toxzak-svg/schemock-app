@@ -1,10 +1,10 @@
 {
-  "name": "schemock",
+  "name": "schemocker",
   "version": "1.0.1",
   "description": "Turn JSON schemas into live mock REST APIs in seconds for frontend/dev/test teams",
   "main": "dist/index.js",
   "bin": {
-    "schemock": "dist/cli/index.js"
+    "schemocker": "dist/cli/index.js"
   },
   "scripts": {
     "build": "node scripts/create-ui-template.js && tsc",
@@ -95,7 +95,16 @@
     ]
   },
   "files": [
-    "dist",
+    "dist/cli",
+    "dist/errors",
+    "dist/generators",
+    "dist/index.js",
+    "dist/index.d.ts",
+    "dist/installer",
+    "dist/integrations",
+    "dist/parsers",
+    "dist/types",
+    "dist/utils",
     "package.json",
     "README.md"
   ],

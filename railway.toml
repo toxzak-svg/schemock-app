@@ -1,0 +1,60 @@
+# Railway.toml - Configuration for deploying Schemock on Railway
+# https://docs.railway.app/reference/config-as-code
+
+[build]
+# Build stage configuration
+builder = "NIXPACKS"
+buildCommand = "npm run build"
+
+[deploy]
+# Deployment configuration
+startCommand = "npm start"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+# Health check configuration
+healthcheckPath = "/health"
+healthcheckTimeout = 100
+
+# Railway will auto-detect PORT, but you can set a default
+# The app will use process.env.PORT or default to 3000
+[deploy.env]
+NODE_ENV = "production"
+
+# Port configuration - Railway will inject the PORT variable
+# Your app should listen on process.env.PORT
+[[deploy.ports]]
+port = 3000
+protocol = "http"
+
+# Volume configuration for persistent schema storage
+# This allows schemas to persist across deployments
+[[deploy.volumes]]
+mountPath = "/app/schemas"
+name = "schemock-schemas"
+
+# Environment-specific overrides
+# Uncomment and configure based on your needs
+
+# [environments.production]
+# [environments.production.deploy.env]
+# LOG_LEVEL = "info"
+
+# [environments.staging]
+# [environments.staging.deploy.env]
+# LOG_LEVEL = "debug"
+
+# Resource configuration (uncomment if needed)
+# [deploy.resources]
+# memory = 512  # Memory in MB
+# cpu = 1       # CPU cores
+
+# Watch paths for automatic redeployment
+# Railway will redeploy when these files change
+[build.watchPaths]
+paths = [
+  "src/**",
+  "package.json",
+  "tsconfig.json",
+  "Dockerfile"
+]
