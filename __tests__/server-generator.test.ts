@@ -10,13 +10,11 @@ describe('ServerGenerator', () => {
   let server: any;
 
   afterEach(() => {
-    console.log('[DIAGNOSTIC] afterEach: server exists?', !!server);
     if (server) {
       try {
         server.close();
-        console.log('[DIAGNOSTIC] afterEach: Server closed successfully');
       } catch (error) {
-        console.log('[DIAGNOSTIC] afterEach: Error closing server:', error);
+        // Ignore errors when closing server (may already be closed)
       }
       server = null;
     }
@@ -52,7 +50,6 @@ describe('ServerGenerator', () => {
   });
 
   it('should support POST requests', async () => {
-    console.log('[DIAGNOSTIC] POST test: Starting, server exists?', !!server);
     // Create a simple Express app for testing
     const testApp = express();
     testApp.use(express.json());
@@ -68,7 +65,6 @@ describe('ServerGenerator', () => {
 
     // Close any existing server
     if (server) {
-      console.log('[DIAGNOSTIC] POST test: Closing existing server');
       server.close();
       server = null;
     }
@@ -76,7 +72,6 @@ describe('ServerGenerator', () => {
     // Start the server
     return new Promise<void>((resolve, reject) => {
       server = testApp.listen(0); // Use random available port
-      console.log('[DIAGNOSTIC] POST test: Server started');
 
       const address = server.address();
       if (!address || typeof address === 'string') {
@@ -100,19 +95,8 @@ describe('ServerGenerator', () => {
           expect(data.data).toHaveProperty('title', 'Test Item');
           resolve();
         })
-        .catch(reject)
-        .finally(() => {
-          console.log('[DIAGNOSTIC] POST test finally: closing server, server exists?', !!server);
-          if (server) {
-            try {
-              server.close();
-              server = null;
-              console.log('[DIAGNOSTIC] POST test finally: Server closed successfully');
-            } catch (error) {
-              console.log('[DIAGNOSTIC] POST test finally: Error closing server:', error);
-            }
-          }
-        });
+        .catch(reject);
+      // Note: Server cleanup is handled by afterEach hook, not here
     });
   });
 });
