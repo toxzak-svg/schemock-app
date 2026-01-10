@@ -62,6 +62,7 @@ __tests__/test-project/
 # Installer build artifacts
 installer-ui/node_modules/
 installer-ui/dist/
+installer-ui/dist-installer/
 
 # Desktop UI build artifacts
 desktop-ui/

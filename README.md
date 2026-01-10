@@ -889,6 +889,85 @@ export default defineConfig({
 
 Now, when you run `npm run dev`, Schemock will start automatically and any requests to `/api` will be served by your mock server!
 
+## 🤖 MCP Integration (Model Context Protocol)
+
+Schemocker now includes a built-in MCP server that enables AI assistants (like Claude, Cursor, and other MCP-compatible tools) to interact with your mock APIs programmatically. This allows AI models to discover endpoints, make requests, and help you build frontend code faster.
+
+### What is MCP?
+
+The Model Context Protocol (MCP) is a standardized protocol that allows AI assistants to interact with external tools and services through a structured interface.
+
+### MCP Tools
+
+The Schemocker MCP server provides three core tools:
+
+1. **`list_routes`** - Discover all available API endpoints with methods, paths, and example payloads
+2. **`call_endpoint`** - Make HTTP requests to Schemocker endpoints and receive JSON responses
+3. **`reload_schema`** - Trigger schema reload to pick up changes instantly
+
+### Quick Setup
+
+**1. Build the MCP server:**
+```bash
+npm run build
+```
+
+**2. Add to your MCP client configuration** (e.g., Claude Desktop's `claude_desktop_config.json`):
+```json
+{
+  "mcpServers": {
+    "schemocker": {
+      "command": "node",
+      "args": [
+        "/absolute/path/to/schemocker/dist/mcp-server/index.js"
+      ],
+      "env": {
+        "SCHEMOCKER_BASE_URL": "http://localhost:3000"
+      }
+    }
+  }
+}
+```
+
+**3. Start Schemocker:**
+```bash
+schemock start examples/simple-user.json --port 3000
+```
+
+**4. Use with AI:**
+Now you can ask your AI assistant:
+- "List all available API endpoints"
+- "Call the GET /api/data endpoint and show me the response"
+- "Generate React code to fetch data from these endpoints"
+
+### Example AI Workflow
+
+```
+User: "Generate a React component that fetches users from my API"
+
+AI: [Uses list_routes tool]
+     → Discovers GET /api/data endpoint
+     
+AI: [Uses call_endpoint tool]
+     → Fetches example response
+     
+AI: [Generates code]
+     → Creates React component with proper types
+```
+
+### Use Cases
+
+- **Frontend Code Generation**: AI can explore your API and generate matching React/Vue/Next.js components
+- **API Testing**: AI can generate test cases and validate responses
+- **Documentation**: AI can auto-generate API docs from discovered routes
+- **Schema Iteration**: Rapidly iterate on schemas with AI assistance
+
+### Documentation
+
+For detailed setup instructions, configuration options, and examples, see the [MCP Server README](src/mcp-server/README.md).
+
+---
+
 ## ✨ Features
 
 ### Core Capabilities

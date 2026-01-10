@@ -589,7 +589,7 @@ program
     try {
       const port = validatePort(options.port);
       console.log(chalk.blue(`🚀 Launching installer UI...`));
-      const server = startInstallerServer(port);
+      startInstallerServer(port);
 
       // Keep the process running
       await new Promise(() => { }); // Never resolves, keeps process alive
@@ -621,8 +621,66 @@ ${chalk.yellow('Examples:')}
 ${chalk.yellow('For detailed help:')}
   ${chalk.cyan('schemock start --help')}
   ${chalk.cyan('schemock init --help')}
+
+${chalk.blue('ℹ️  Launching desktop UI...')}
 `);
-  process.exit(0);
+
+  // Try to launch the desktop UI
+  const { spawn } = require('child_process');
+  const { join } = require('path');
+
+  // Determine the path to the desktop UI
+  // When running from source, use the desktop-ui directory
+  // When running from the built executable, use the bundled desktop UI
+  let desktopUiPath;
+  let electronPath;
+
+  // Check if we're running from a built executable
+  // @ts-ignore - process.pkg is added by pkg
+  if (process.pkg) {
+    // Running from pkg-built executable
+    // The desktop UI should be bundled alongside the executable
+    const exeDir = require('path').dirname(process.execPath);
+    desktopUiPath = join(exeDir, 'schemock-portable.exe');
+    electronPath = desktopUiPath;
+  } else {
+    // Running from source - try to use npx electron
+    electronPath = 'npx';
+    desktopUiPath = join(__dirname, '../../desktop-ui');
+  }
+
+  try {
+    console.log(chalk.blue('🚀 Starting Schemock Desktop UI...'));
+
+    // @ts-ignore - process.pkg is added by pkg
+    if (process.pkg) {
+      // Launch the bundled portable executable
+      const child = spawn(desktopUiPath, [], {
+        detached: true,
+        stdio: 'ignore',
+        windowsHide: false
+      });
+      child.unref();
+    } else {
+      // Launch using npx electron from source
+      const child = spawn(electronPath, ['electron', desktopUiPath], {
+        detached: true,
+        stdio: 'ignore',
+        shell: true,
+        windowsHide: false
+      });
+      child.unref();
+    }
+
+    // Exit the CLI process after a short delay to give the UI time to start
+    setTimeout(() => process.exit(0), 2000);
+  } catch {
+    console.log(chalk.yellow('⚠️  Could not launch desktop UI.'));
+    console.log(chalk.yellow('   You can start the desktop UI manually with:'));
+    console.log(chalk.cyan('   cd desktop-ui && npm start'));
+    console.log(chalk.gray('\nFalling back to CLI mode. Use --help for available commands.'));
+    process.exit(1);
+  }
 }
 
 program.parse(process.argv);

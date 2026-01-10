@@ -14,7 +14,8 @@
     "incremental": true,
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
     "sourceMap": true,
-    "removeComments": false
+    "removeComments": false,
+    "allowSyntheticDefaultImports": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "**/*.test.ts"]
