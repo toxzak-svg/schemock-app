@@ -23,7 +23,7 @@ describe('ServerGenerator Enhanced', () => {
     }
 
     // Small delay to ensure port is fully released
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 500));
   });
 
   describe('Constructor and Initialization', () => {

@@ -4,23 +4,21 @@ import * as http from 'http';
 import express from 'express';
 import { AddressInfo } from 'net';
 
-const TEST_PORT = 3001;
-
 describe('ServerGenerator', () => {
-  let server: any;
+  let server: http.Server | null = null;
 
-  afterEach(() => {
+  afterEach((done) => {
     if (server) {
-      try {
-        server.close();
-      } catch (error) {
-        // Ignore errors when closing server (may already be closed)
-      }
-      server = null;
+      server.close(() => {
+        server = null;
+        done();
+      });
+    } else {
+      done();
     }
   });
 
-  it('should start a server with the specified port', async () => {
+  it('should start a server with the specified port', (done) => {
     const schema: Schema = {
       type: 'object',
       properties: {
@@ -30,26 +28,34 @@ describe('ServerGenerator', () => {
       required: ['id', 'name']
     };
 
-    const generator = ServerGenerator.generateFromSchema(schema, { port: TEST_PORT });
-    server = generator.getApp().listen(TEST_PORT);
+    const generator = ServerGenerator.generateFromSchema(schema, { port: 0 });
+    server = generator.getApp().listen(0, async () => {
+      try {
+        const address = server!.address() as AddressInfo;
+        const port = address.port;
 
-    const response = await fetch(`http://localhost:${TEST_PORT}/api/data`);
-    const data = await response.json() as {
-      message: string;
-      timestamp: string;
-      data: Array<{ id: string; name: string }>;
-    };
+        const response = await fetch(`http://localhost:${port}/api/data`);
+        const data = await response.json() as {
+          message: string;
+          timestamp: string;
+          data: Array<{ id: string; name: string }>;
+        };
 
-    expect(response.status).toBe(200);
-    expect(data).toHaveProperty('message');
-    expect(data).toHaveProperty('timestamp');
-    expect(data).toHaveProperty('data');
-    expect(Array.isArray(data.data)).toBe(true);
-    expect(typeof data.data[0].id).toBe('string');
-    expect(typeof data.data[0].name).toBe('string');
+        expect(response.status).toBe(200);
+        expect(data).toHaveProperty('message');
+        expect(data).toHaveProperty('timestamp');
+        expect(data).toHaveProperty('data');
+        expect(Array.isArray(data.data)).toBe(true);
+        expect(typeof data.data[0].id).toBe('string');
+        expect(typeof data.data[0].name).toBe('string');
+        done();
+      } catch (error) {
+        done(error);
+      }
+    });
   });
 
-  it('should support POST requests', async () => {
+  it('should support POST requests', (done) => {
     // Create a simple Express app for testing
     const testApp = express();
     testApp.use(express.json());
@@ -63,40 +69,30 @@ describe('ServerGenerator', () => {
       });
     });
 
-    // Close any existing server
-    if (server) {
-      server.close();
-      server = null;
-    }
+    // Start the server and wait for it to be listening
+    server = testApp.listen(0, async () => {
+      try {
+        const address = server!.address() as AddressInfo;
+        const port = address.port;
+        const testUrl = `http://localhost:${port}/api/items`;
 
-    // Start the server
-    return new Promise<void>((resolve, reject) => {
-      server = testApp.listen(0); // Use random available port
+        // Make the request
+        const response = await fetch(testUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: 'Test Item', completed: false })
+        });
 
-      const address = server.address();
-      if (!address || typeof address === 'string') {
-        return reject(new Error('Failed to get server address'));
+        const data = await response.json();
+        expect(response.status).toBe(201);
+        expect(data).toHaveProperty('success', true);
+        expect(data).toHaveProperty('data');
+        expect(data.data).toHaveProperty('id', 'test-id');
+        expect(data.data).toHaveProperty('title', 'Test Item');
+        done();
+      } catch (error) {
+        done(error);
       }
-
-      const testUrl = `http://localhost:${address.port}/api/items`;
-
-      // Make the request
-      fetch(testUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: 'Test Item', completed: false })
-      })
-        .then(async (response) => {
-          const data = await response.json();
-          expect(response.status).toBe(201);
-          expect(data).toHaveProperty('success', true);
-          expect(data).toHaveProperty('data');
-          expect(data.data).toHaveProperty('id', 'test-id');
-          expect(data.data).toHaveProperty('title', 'Test Item');
-          resolve();
-        })
-        .catch(reject);
-      // Note: Server cleanup is handled by afterEach hook, not here
     });
   });
 });

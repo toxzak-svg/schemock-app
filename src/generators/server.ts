@@ -247,6 +247,12 @@ export class ServerGenerator {
    * @returns Promise that resolves when the server is successfully started
    */
   public async start(): Promise<void> {
+    // Check if server is already running
+    if (this.server && this.server.listening) {
+      const port = this.config.server.port !== undefined ? this.config.server.port : 3000;
+      throw new PortError(`Server is already running on port ${port}`, port);
+    }
+
     return new Promise((resolve, reject) => {
       const port = this.config.server.port !== undefined ? this.config.server.port : 3000;
 
