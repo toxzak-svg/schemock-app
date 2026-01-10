@@ -63,6 +63,9 @@ __tests__/test-project/
 installer-ui/node_modules/
 installer-ui/dist/
 
+# Desktop UI build artifacts
+desktop-ui/
+
 # Code signing
 *.p12
 *.pfx
