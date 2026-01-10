@@ -164,7 +164,7 @@ class SchemockerMCPServer {
           timeout: this.config.timeout,
         });
         routes = response.data.routes || [];
-      } catch (error) {
+      } catch (_error) {
         // If the routes endpoint doesn't exist, try to discover from the schema
         const schemaUrl = `${this.baseUrl}/__schemock/schema`;
         const schemaResponse = await axios.get(schemaUrl, {
@@ -186,7 +186,7 @@ class SchemockerMCPServer {
                 ...route,
                 exampleResponse: exampleResponse.data,
               };
-            } catch (error) {
+            } catch (_error) {
               // If we can't get an example, just return route info
               return route;
             }

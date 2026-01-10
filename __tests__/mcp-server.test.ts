@@ -62,7 +62,7 @@ describe('SchemockerMCPServer', () => {
         });
 
         const handler = mockServer.getRequestHandler(CallToolRequestSchema);
-        const result = await handler({
+        await handler({
           name: 'list_routes',
           arguments: { includeExamples: true },
         });
@@ -88,7 +88,7 @@ describe('SchemockerMCPServer', () => {
           .mockResolvedValueOnce({ data: mockSchema });
 
         const handler = mockServer.getRequestHandler(CallToolRequestSchema);
-        const result = await handler({
+        await handler({
           name: 'list_routes',
           arguments: {},
         });
@@ -111,7 +111,7 @@ describe('SchemockerMCPServer', () => {
         });
 
         const handler = mockServer.getRequestHandler(CallToolRequestSchema);
-        const result = await handler({
+        await handler({
           name: 'call_endpoint',
           arguments: {
             method: 'GET',
@@ -134,7 +134,7 @@ describe('SchemockerMCPServer', () => {
         });
 
         const handler = mockServer.getRequestHandler(CallToolRequestSchema);
-        const result = await handler({
+        await handler({
           name: 'call_endpoint',
           arguments: {
             method: 'POST',
@@ -155,7 +155,7 @@ describe('SchemockerMCPServer', () => {
         });
 
         const handler = mockServer.getRequestHandler(CallToolRequestSchema);
-        const result = await handler({
+        await handler({
           name: 'call_endpoint',
           arguments: {
             method: 'GET',
@@ -205,7 +205,7 @@ describe('SchemockerMCPServer', () => {
         });
 
         const handler = mockServer.getRequestHandler(CallToolRequestSchema);
-        const result = await handler({
+        await handler({
           name: 'reload_schema',
           arguments: {},
         });
@@ -223,7 +223,7 @@ describe('SchemockerMCPServer', () => {
         });
 
         const handler = mockServer.getRequestHandler(CallToolRequestSchema);
-        const result = await handler({
+        await handler({
           name: 'reload_schema',
           arguments: {
             schemaPath: './examples/updated-schema.json',
